@@ -124,7 +124,7 @@
         <button class="icono-boton hamburguesa" data-accion="menu" aria-label="Abrir navegación" aria-expanded="false" aria-controls="sitio-lateral">
           ${icono('menu')}
         </button>
-        <a class="marca" href="index.html" aria-label="MeritIA · Inicio de la documentación">
+        <a class="marca" href="index.html">
           <span class="marca__logo" aria-hidden="true">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
               <path d="M12 2.5 20 12l-8 9.5L4 12Z" stroke="currentColor" stroke-width="1.1"/>
