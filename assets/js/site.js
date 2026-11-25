@@ -17,6 +17,7 @@
       enlaces: [
         { id: 'inicio', href: 'index.html', texto: 'Inicio', desc: 'Qué es MeritIA' },
         { id: 'estado', href: 'estado.html', texto: 'Estado del proyecto', desc: 'Qué está hecho y qué falta' },
+        { id: 'buenas-practicas', href: 'index.html#buenas-practicas', texto: 'Buenas prácticas', desc: 'Cómo trabajamos y mejoramos' },
       ],
     },
     {
