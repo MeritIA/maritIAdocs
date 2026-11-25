@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="es" data-page="inicio">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>MeritIA · Documentación</title>
+  <meta name="description" content="Documentación técnica de MeritIA: arquitectura, frontend, backend, evaluación con IA, mentor RAG, leyes y operación.">
+  <meta name="author" content="MeritIA">
+  <meta name="theme-color" content="#08080a" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f7f7f8" media="(prefers-color-scheme: light)">
+  <meta name="color-scheme" content="dark light">
+  <link rel="canonical" href="https://meritia.github.io/maritIAdocs/">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/img/logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/site.css">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MeritIA · Documentación">
+  <meta property="og:locale" content="es_CO">
+  <meta property="og:title" content="MeritIA · Documentación">
+  <meta property="og:description" content="Documentación técnica de MeritIA: arquitectura, frontend, backend, evaluación con IA, mentor RAG, leyes y operación.">
+  <meta property="og:url" content="https://meritia.github.io/maritIAdocs/">
+  <meta property="og:image" content="https://meritia.github.io/maritIAdocs/assets/img/og.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="MeritIA · Documentación">
+  <meta name="twitter:description" content="Documentación técnica de MeritIA: arquitectura, frontend, backend, evaluación con IA, mentor RAG, leyes y operación.">
+  <meta name="twitter:image" content="https://meritia.github.io/maritIAdocs/assets/img/og.svg">
+  <script>
+    try { var t = localStorage.getItem('meritia-docs-tema'); if (t === 'claro') document.documentElement.dataset.tema = 'claro'; } catch (e) {}
+  </script>
+</head>
+<body>
+  <a class="salto" href="#contenido">Saltar al contenido</a>
+  <div id="sitio-barra"></div>
+  <div class="envoltura">
+    <aside id="sitio-lateral"></aside>
+    <main id="contenido" class="principal">
+      <div class="prosa prosa--ancha">
+<section class="portada">
+  <span class="portada__etiqueta"><i></i>Documentación técnica · v1.0 · noviembre de 2026</span>
+  <h1>Evaluación técnica con <span>evidencia</span>, no con intuición.</h1>
+  <p class="portada__entrada">
+    MeritIA reemplaza el filtro por hoja de vida con retos prácticos pagados. Cada entrega se
+    califica contra una rúbrica, con un puntaje por criterio y la evidencia que lo sostiene.
+    Esta documentación explica cómo está construido el sistema, qué decisiones lo sostienen y
+    qué leyes colombianas cumple —y dónde todavía no las cumple del todo.
+  </p>
+  <div class="portada__acciones">
+    <a class="boton boton--lleno" href="arquitectura.html">Explorar la arquitectura <span aria-hidden="true">→</span></a>
+    <a class="boton" href="estado.html">Ver el estado real</a>
+    <a class="boton boton--fantasma" href="leyes.html">Leyes y privacidad</a>
+  </div>
+
+  <div class="portada__panel">
+    <div class="flujo" aria-label="Flujo del producto en cinco pasos">
+      <div class="flujo__paso"><b>01 · RETO</b><span>La empresa publica un ejercicio con rúbrica y paga la prueba.</span></div>
+      <div class="flujo__paso"><b>02 · ENTREGA</b><span>El candidato sube código o un documento; la integridad se verifica.</span></div>
+      <div class="flujo__paso"><b>03 · EVALUACIÓN</b><span>La IA puntúa cada criterio y devuelve evidencia textual.</span></div>
+      <div class="flujo__paso"><b>04 · REVISIÓN</b><span>Un humano decide antes de cualquier consecuencia económica.</span></div>
+      <div class="flujo__paso"><b>05 · RANKING</b><span>El reclutador ve notas explicables, no una caja negra.</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="cifras" aria-label="Cifras del proyecto">
+  <div class="cifra"><span class="cifra__valor">8</span><span class="cifra__etiqueta">módulos de dominio<br>en el backend</span></div>
+  <div class="cifra"><span class="cifra__valor">83</span><span class="cifra__etiqueta">operaciones<br>en el contrato OpenAPI</span></div>
+  <div class="cifra"><span class="cifra__valor">89,6<em>%</em></span><span class="cifra__etiqueta">cobertura de líneas<br>en el backend</span></div>
+  <div class="cifra"><span class="cifra__valor">17</span><span class="cifra__etiqueta">decisiones de arquitectura<br>registradas y vigentes</span></div>
+</div>
+
+<h2>Qué encontrarás aquí</h2>
+<p>
+  La documentación está organizada por capas del sistema y por obligaciones. Cada página distingue
+  lo que está implementado de lo que está a medias y de lo que no existe: el proyecto prefiere un
+  límite escrito a una promesa vacía.
+</p>
+
+<div class="rejilla rejilla--3">
+  <a class="tarjeta" href="arquitectura.html">
+    <span class="tarjeta__num">01 · Sistema</span>
+    <h3>Arquitectura</h3>
+    <p>Un monolito modular, dos servicios de IA sin estado y una sola base. Las fronteras se verifican con ESLint, no con buenas intenciones.</p>
+    <span class="tarjeta__pie flecha">Vista general</span>
+  </a>
+  <a class="tarjeta" href="frontend.html">
+    <span class="tarjeta__num">02 · Cliente</span>
+    <h3>Frontend</h3>
+    <p>Angular 21 sin zonas, signals, carga diferida y la misma aplicación empaquetada como APK con Capacitor.</p>
+    <span class="tarjeta__pie flecha">Interfaz y diseño</span>
+  </a>
+  <a class="tarjeta" href="backend.html">
+    <span class="tarjeta__num">03 · Servidor</span>
+    <h3>Backend</h3>
+    <p>NestJS 12, PASETO, PostgreSQL, Redis y BullMQ. Ocho módulos, 83 operaciones y un control de admisión que prefiere rechazar antes que ahogarse.</p>
+    <span class="tarjeta__pie flecha">Módulos y API</span>
+  </a>
+  <a class="tarjeta" href="ia.html">
+    <span class="tarjeta__num">04 · Modelos</span>
+    <h3>Servicio de IA</h3>
+    <p>Evaluación contra rúbrica con salida validada, temperatura cero y ocho señales de inyección de prompts. El modelo propone; el servicio calcula.</p>
+    <span class="tarjeta__pie flecha">Contrato y defensas</span>
+  </a>
+  <a class="tarjeta" href="rag.html">
+    <span class="tarjeta__num">05 · Recuperación</span>
+    <h3>Mentor RAG</h3>
+    <p>BM25 y vectores fusionados con RRF. Cada consejo cita el fragmento del que salió y la posición que le dio cada recuperador.</p>
+    <span class="tarjeta__pie flecha">Pipeline híbrido</span>
+  </a>
+  <a class="tarjeta" href="leyes.html">
+    <span class="tarjeta__num">06 · Cumplimiento</span>
+    <h3>Leyes y privacidad</h3>
+    <p>Ley 1581 de 2012 aplicada al modelo de datos: consentimiento por finalidad, cifrado, derechos del titular y transferencias internacionales.</p>
+    <span class="tarjeta__pie flecha">Matriz normativa</span>
+  </a>
+</div>
+
+<h2>Los principios que ordenan el sistema</h2>
+
+<div class="rejilla rejilla--2">
+  <div class="tarjeta">
+    <span class="tarjeta__icono" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19V5m0 14h16M8 15l3-4 3 2 5-7"/></svg></span>
+    <h3>La evidencia manda</h3>
+    <p>Una nota sin explicación no sirve para decidir ni para defenderse. Cada criterio viaja con su puntaje, su peso y un fragmento de la entrega que lo justifica. La nota final la calcula el servicio, nunca el modelo.</p>
+  </div>
+  <div class="tarjeta">
+    <span class="tarjeta__icono" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 5 6v5c0 4.4 3 8.4 7 10 4-1.6 7-5.6 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg></span>
+    <h3>La persona antes que el número</h3>
+    <p>Ninguna descalificación con consecuencia económica ocurre sin revisión humana. La cola de moderación existe para eso: casos marcados por riesgo o por muestreo, con SLA de 24 horas y justificación escrita.</p>
+  </div>
+  <div class="tarjeta">
+    <span class="tarjeta__icono" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span>
+    <h3>Privacidad en el modelo de datos</h3>
+    <p>El correo y el nombre se guardan cifrados con AES-256-GCM y se buscan por un hash aparte. Las contraseñas usan argon2id. Los consentimientos son un historial que solo crece, no un booleano que se sobrescribe.</p>
+  </div>
+  <div class="tarjeta">
+    <span class="tarjeta__icono" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v18M5 8l7-5 7 5M5 16l7 5 7-5"/></svg></span>
+    <h3>Decir lo que falta</h3>
+    <p>Los pagos son simulados, la extracción de PDF está pendiente y el E2E del flujo completo no existe. Este sitio lo marca con la misma claridad con la que muestra lo terminado.</p>
+  </div>
+</div>
+
+<h2>El mapa del sistema</h2>
+<p>
+  Tres procesos desplegables y dos proveedores externos. El backend es el único que habla con la
+  base de datos; los servicios de IA no tienen estado ni acceso a ella. El navegador nunca llama
+  a un servicio de IA: todo pasa por el backend.
+</p>
+
+<div class="diagrama">
+  <div class="diagrama__cabecera"><span class="punto"></span>Vista de contenedores</div>
+  <div class="diagrama__lienzo">
+    <div class="mermaid">
+flowchart LR
+  subgraph Cliente["Cliente"]
+    WEB["Web Angular 21<br/>SPA + APK"]
+  end
+
+  subgraph Plataforma["Plataforma MeritIA"]
+    API["Backend NestJS 12<br/>8 módulos · REST /api/v1"]
+    DB[("PostgreSQL<br/>un esquema por módulo")]
+    REDIS[("Redis<br/>colas BullMQ")]
+    OBJ[("S3 / SeaweedFS<br/>entregas")]
+  end
+
+  subgraph Modelos["Servicios de IA"]
+    AIS["ai-service<br/>evaluación"]
+    RAG["rag-service<br/>mentor"]
+  end
+
+  GEM["Gemini API"]
+
+  WEB -->|"HTTPS · PASETO"| API
+  API --> DB
+  API --> REDIS
+  API --> OBJ
+  REDIS -->|"trabajo en cola"| AIS
+  API -->|"consulta del mentor"| RAG
+  AIS --> GEM
+  RAG --> GEM
+    </div>
+  </div>
+  <div class="diagrama__pie">El backend es la única puerta a los datos. Los servicios de IA reciben todo en la petición y no comparten base ni cola.</div>
+</div>
+
+<h2>Estado en una línea</h2>
+<div class="cinta">
+  <b>Backend</b> <span class="insignia insignia--ok">funcional</span>
+  <b>Frontend</b> <span class="insignia insignia--ok">funcional</span>
+  <b>IA</b> <span class="insignia insignia--ok">operativa</span>
+  <b>RAG</b> <span class="insignia insignia--ok">operativo</span>
+  <b>Pagos</b> <span class="insignia insignia--parcial">simulados</span>
+  <b>E2E completo</b> <span class="insignia insignia--pendiente">pendiente</span>
+</div>
+
+<div class="aviso aviso--aviso">
+  <p class="aviso__titulo">Cómo leer las cifras</p>
+  <p>
+    Las métricas de rendimiento y cobertura provienen de mediciones del repositorio, no de
+    estimaciones de marketing. El p95 de 83 ms corresponde a una carga sana de 30 iteraciones por
+    segundo; el punto de caída está documentado en <a href="backend.html#rendimiento">Backend</a>.
+    Cuando un dato no se pudo verificar, la página lo dice.
+  </p>
+</div>
+
+<h2>Recorridos sugeridos</h2>
+<ul>
+  <li><strong>Si vienes a evaluar el proyecto:</strong> empieza por <a href="arquitectura.html">Arquitectura</a>, sigue por <a href="decisiones.html">Decisiones</a> y termina en <a href="estado.html">Estado</a>.</li>
+  <li><strong>Si vas a trabajar en el código:</strong> <a href="frontend.html">Frontend</a>, <a href="backend.html">Backend</a>, <a href="ia.html">IA</a> y <a href="rag.html">RAG</a> contienen contratos, límites y convenciones.</li>
+  <li><strong>Si te interesa el cumplimiento:</strong> <a href="leyes.html">Leyes y privacidad</a> conecta cada obligación con el mecanismo que la atiende, y con lo que falta.</li>
+  <li><strong>Si vas a desplegarlo:</strong> <a href="operacion.html">Operación</a> reúne variables, pipeline, respaldos y runbook.</li>
+</ul>
+
+<div class="aviso">
+  <p class="aviso__titulo">Procedencia</p>
+  <p>
+    Este sitio se genera a partir de los repositorios <code>web</code>, <code>backend</code>,
+    <code>ai-service</code> y <code>rag-service</code> de la organización MeritIA, y de sus
+    documentos de ingeniería (requisitos, ADR, plan de seguridad y declaración de alcance).
+    No es una presentación comercial: es la explicación técnica de lo que el código hace hoy.
+  </p>
+</div>
+      </div>
+      <nav class="paginacion" aria-label="Navegación entre páginas">
+        <div class="paginacion__vacio" aria-hidden="true"></div>
+        <a class="paginacion__siguiente" href="arquitectura.html"><span>Siguiente →</span><strong>Arquitectura</strong></a>
+      </nav>
+    </main>
+    <aside id="sitio-toc" aria-label="Contenido de la página"></aside>
+  </div>
+  <div id="sitio-pie"></div>
+  <noscript>
+    <div style="max-width:900px;margin:0 auto;padding:24px">
+      <p><strong>La navegación lateral necesita JavaScript.</strong> Estas son las secciones:</p>
+      <ul>
+        <li><a href="index.html">MeritIA · Documentación</a></li>
+        <li><a href="arquitectura.html">Arquitectura</a></li>
+        <li><a href="frontend.html">Frontend</a></li>
+        <li><a href="backend.html">Backend</a></li>
+        <li><a href="ia.html">Servicio de IA</a></li>
+        <li><a href="rag.html">Mentor RAG</a></li>
+        <li><a href="leyes.html">Leyes y privacidad</a></li>
+        <li><a href="requisitos.html">Requisitos</a></li>
+        <li><a href="operacion.html">Operación</a></li>
+        <li><a href="decisiones.html">Decisiones de arquitectura</a></li>
+        <li><a href="estado.html">Estado del proyecto</a></li>
+      </ul>
+    </div>
+  </noscript>
+  <script src="assets/js/mermaid.min.js" defer></script>
+  <script src="assets/js/site.js" defer></script>
+</body>
+</html>

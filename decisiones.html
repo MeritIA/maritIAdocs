@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="es" data-page="decisiones">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Decisiones de arquitectura · MeritIA</title>
+  <meta name="description" content="Las 17 decisiones registradas: contexto, alternativa descartada y consecuencia aceptada.">
+  <meta name="author" content="MeritIA">
+  <meta name="theme-color" content="#08080a" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f7f7f8" media="(prefers-color-scheme: light)">
+  <meta name="color-scheme" content="dark light">
+  <link rel="canonical" href="https://meritia.github.io/maritIAdocs/decisiones.html">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/img/logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/site.css">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MeritIA · Documentación">
+  <meta property="og:locale" content="es_CO">
+  <meta property="og:title" content="Decisiones de arquitectura · MeritIA">
+  <meta property="og:description" content="Las 17 decisiones registradas: contexto, alternativa descartada y consecuencia aceptada.">
+  <meta property="og:url" content="https://meritia.github.io/maritIAdocs/decisiones.html">
+  <meta property="og:image" content="https://meritia.github.io/maritIAdocs/assets/img/og.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Decisiones de arquitectura · MeritIA">
+  <meta name="twitter:description" content="Las 17 decisiones registradas: contexto, alternativa descartada y consecuencia aceptada.">
+  <meta name="twitter:image" content="https://meritia.github.io/maritIAdocs/assets/img/og.svg">
+  <script>
+    try { var t = localStorage.getItem('meritia-docs-tema'); if (t === 'claro') document.documentElement.dataset.tema = 'claro'; } catch (e) {}
+  </script>
+</head>
+<body>
+  <a class="salto" href="#contenido">Saltar al contenido</a>
+  <div id="sitio-barra"></div>
+  <div class="envoltura">
+    <aside id="sitio-lateral"></aside>
+    <main id="contenido" class="principal">
+      <div class="prosa">
+<header class="cabecera-pagina">
+  <span class="ceja">Decisiones de arquitectura</span>
+  <h1>Diecisiete decisiones, cada una con lo que se descartó y lo que costó.</h1>
+  <p class="entradilla">
+    Un registro de decisiones no es un acta de lo que salió bien: es la memoria de por qué el sistema
+    no se parece a la opción obvia. Cada entrada conserva el contexto, la alternativa que se rechazó y
+    la consecuencia que se aceptó. Sin eso, la próxima persona «mejora» el diseño deshaciendo una
+    decisión que no sabía que existía.
+  </p>
+  <div class="metas">
+    <span class="meta">17 ADR</span>
+    <span class="meta">15 vigentes</span>
+    <span class="meta meta--acento">2 con disparador de revisión</span>
+    <span class="meta">Desde septiembre de 2026</span>
+  </div>
+</header>
+
+<div class="aviso">
+  <p class="aviso__titulo">Cómo se leen</p>
+  <p>
+    Cada ADR tiene estado, contexto, decisión, alternativas descartadas y consecuencias. Los ADR-0001
+    a 0014 usan un formato breve; los ADR-0015 a 0017, escritos en noviembre, son más largos porque
+    nacieron de una contradicción del diseño y no de una elección técnica. Los documentos completos
+    están en <code>backend/docs/adr/</code>.
+  </p>
+</div>
+
+<h2 id="mapa">El mapa</h2>
+<div class="tabla-envoltura">
+  <table>
+    <thead><tr><th>ADR</th><th>Decisión</th><th>Lo que se descartó</th><th>Estado</th></tr></thead>
+    <tbody>
+      <tr><td><a href="#adr-0001">0001</a></td><td>Monolito modular con fronteras verificadas por ESLint</td><td>Microservicios</td><td><span class="insignia insignia--ok">vigente</span></td></tr>
+      <tr><td><a href="#adr-0002">0002</a></td><td>Un esquema por módulo, sin claves foráneas cruzadas</td><td>Esquema único y FK entre módulos</td><td><span class="insignia insignia--ok">vigente</span></td></tr>
+      <tr><td><a href="#adr-0003">0003</a></td><td>PostgreSQL para lo persistente, Redis solo para cola y límites</td><td>MongoDB para evaluaciones</td><td><span class="insignia insignia--ok">vigente</span></td></tr>
+      <tr><td><a href="#adr-0004">0004</a></td><td>REST versionado con OpenAPI generado desde el código</td><td>GraphQL</td><td><span class="insignia insignia--ok">vigente</span></td></tr>
+      <tr><td><a href="#adr-0005">0005</a></td><td>PASETO v4 público con Ed25519</td><td>JWT</td><td><span class="insignia insignia--ok">vigente</span></td></tr>
+      <tr><td><a href="#adr-0006">0006</a></td><td>AES-256-GCM para PII y hash SHA-256 para buscar el correo</td><td>Cifrar y descifrar toda la tabla</td><td><span class="insignia insignia--ok">vigente</span></td></tr>
+      <tr><td><a href="#adr-0007">0007</a></td><td>Evaluación asíncrona con BullMQ</td><td>Evaluar dentro de la petición</td><td><span class="insignia insignia--ok">vigente</span></td></tr>
+      <tr><td><a href="#adr-0008">0008</a></td><td>La IA es otro proceso y no recibe archivos</td><td>Un solo proceso con el SDK dentro</td><td><span class="insignia insignia--ok">vigente</span></td></tr>
+      <tr><td><a href="#adr-0009">0009</a></td><td>Almacenamiento S3 con URLs firmadas; SeaweedFS en desarrollo</td><td>Archivos en la base o en el disco</td><td><span class="insignia insignia--ok">vigente</span></td></tr>
+      <tr><td><a href="#adr-0010">0010</a></td><td>Reportes compone en vivo, sin tabla propia</td><td>Proyección materializada</td><td><span class="insignia insignia--parcial">con disparador</span></td></tr>
+      <tr><td><a href="#adr-0011">0011</a></td><td>Control de admisión en el middleware: 503 antes de ahogarse</td><td>Subir el límite del rate limiting</td><td><span class="insignia insignia--parcial">por re-medir</span></td></tr>
+      <tr><td><a href="#adr-0012">0012</a></td><td>404 en vez de 403 a un recurso ajeno</td><td>403 semánticamente correcto</td><td><span class="insignia insignia--ok">vigente</span></td></tr>
+      <tr><td><a href="#adr-0013">0013</a></td><td>Aviso por correo al cerrar, sin resultado</td><td>Mandar la nota y el puesto en el correo</td><td><span class="insignia insignia--ok">vigente, apagado</span></td></tr>
+      <tr><td><a href="#adr-0014">0014</a></td><td>Consentimientos como historial que solo crece</td><td>Un booleano por permiso</td><td><span class="insignia insignia--ok">vigente</span></td></tr>
+      <tr><td><a href="#adr-0015">0015</a></td><td>Abrir el catálogo sin construir un motor de afinidad</td><td>No abrirlo hasta tener el motor</td><td><span class="insignia insignia--ok">aceptada</span></td></tr>
+      <tr><td><a href="#adr-0016">0016</a></td><td>Afinidad desde rúbricas calificadas; ordena, no esconde</td><td>Afinidad declarada por el candidato</td><td><span class="insignia insignia--ok">aceptada</span></td></tr>
+      <tr><td><a href="#adr-0017">0017</a></td><td>Vocabulario de habilidades e invitación que solo acepta</td><td>Un enum cerrado; invitación que también rechaza</td><td><span class="insignia insignia--ok">aceptada</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 id="fronteras">Fronteras y datos</h2>
+
+<article class="tarjeta" id="adr-0001">
+  <span class="tarjeta__num">ADR-0001</span>
+  <h3>Monolito modular, no microservicios</h3>
+  <p><strong>Contexto.</strong> Seis capacidades que el Diccionario de la EDT nombra por separado, y un equipo de tres personas sin plataforma de despliegue propia.</p>
+  <p><strong>Decisión.</strong> Un solo proceso desplegable, partido en módulos con fronteras verificadas por herramienta: cada módulo expone su interfaz en un <code>index.ts</code> y ESLint falla si otro importa algo que no esté ahí.</p>
+  <p><strong>Descartado.</strong> Microservicios: seis despliegues, seis juegos de credenciales y la primera consulta que cruza módulos —el ranking cruza cuatro— convertida en una llamada de red que puede fallar sola.</p>
+  <p><strong>Consecuencia aceptada.</strong> Un módulo no puede escalar por separado. El plan de escalado lo parte cuando hay un disparador medido, no antes.</p>
+</article>
+
+<article class="tarjeta" id="adr-0002">
+  <span class="tarjeta__num">ADR-0002</span>
+  <h3>Un esquema por módulo, sin claves foráneas entre ellos</h3>
+  <p><strong>Contexto.</strong> Si los módulos comparten el espacio de nombres, la frontera del ADR-0001 se queda en el código: nada impide que reportes lea <code>usuarios</code> y se acople a su forma.</p>
+  <p><strong>Decisión.</strong> Un esquema por módulo y ninguna FK entre esquemas distintos. Lo que un módulo necesita de otro lo guarda como identificador y lo pide por su puerta pública.</p>
+  <p><strong>Descartado.</strong> Un esquema único, cómodo pero acoplante; y las FK entre esquemas, que dan integridad real pero amarran las migraciones de dos módulos a la vez.</p>
+  <p><strong>Consecuencia aceptada.</strong> La integridad referencial que la base ya no puede dar la sostiene el servicio. Un borrado en cascada no existe: hay que decidirlo.</p>
+</article>
+
+<article class="tarjeta" id="adr-0003">
+  <span class="tarjeta__num">ADR-0003</span>
+  <h3>PostgreSQL como única base de datos</h3>
+  <p><strong>Contexto.</strong> Datos relacionales, documentos de forma variable (la respuesta de la IA con su desglose) y colas: tres necesidades que suelen justificar tres tecnologías.</p>
+  <p><strong>Decisión.</strong> PostgreSQL para todo lo persistente, con <code>jsonb</code> donde la forma varía. Redis solo para cola y rate limiting, que no son persistencia: si se vacía, no se pierde una nota ya emitida.</p>
+  <p><strong>Descartado.</strong> MongoDB para las evaluaciones. La evaluación es justo el dato que hay que poder disputar: exige transacciones y una relación fiable con la entrega, la versión de rúbrica y la vacante.</p>
+  <p><strong>Consecuencia aceptada.</strong> Las consultas sobre <code>jsonb</code> son menos naturales que en un documental. Tres personas mantienen un motor, no dos.</p>
+</article>
+
+<article class="tarjeta" id="adr-0004">
+  <span class="tarjeta__num">ADR-0004</span>
+  <h3>REST con contrato OpenAPI, no GraphQL</h3>
+  <p><strong>Contexto.</strong> Dos clientes consume la API —una web y una APK—, escritos por gente distinta de quien escribe el backend.</p>
+  <p><strong>Decisión.</strong> REST versionado en <code>/api/v1</code> con el contrato OpenAPI generado desde el código y versionado en el repositorio. La CI falla si el documento publicado no coincide con lo que el código produce.</p>
+  <p><strong>Descartado.</strong> GraphQL: la autorización se reparte por cada <em>resolver</em> y es más fácil dejar un campo expuesto sin darse cuenta. En un producto cuyo riesgo principal es que alguien vea datos de otra empresa, eso pesa más que la flexibilidad de campos.</p>
+  <p><strong>Consecuencia aceptada.</strong> El cliente pide de más en algunas pantallas. A cambio, la matriz de permisos vive en un solo sitio y es auditable.</p>
+</article>
+
+<h2 id="seguridad">Identidad y seguridad</h2>
+
+<article class="tarjeta" id="adr-0005">
+  <span class="tarjeta__num">ADR-0005</span>
+  <h3>PASETO v4 público en vez de JWT</h3>
+  <p><strong>Contexto.</strong> Hacen falta tokens para dos clientes: web con cookie y APK con cabecera. El Plan de Seguridad exige que la autorización no se pueda falsificar.</p>
+  <p><strong>Decisión.</strong> PASETO v4 público con firma Ed25519. El backend firma con la clave privada y cualquier componente verifica con la pública. La web usa cookie <code>HttpOnly</code>, <code>SameSite=strict</code> y <code>Secure</code> en producción; la APK, cabecera <code>Bearer</code> y almacenamiento del sistema.</p>
+  <p><strong>Descartado.</strong> JWT: su flexibilidad es la fuente de sus vulnerabilidades conocidas —<code>alg: none</code>, confusión HMAC/RSA, validar a mano el algoritmo—. PASETO no tiene un campo de algoritmo que negociar.</p>
+  <p><strong>Consecuencia aceptada.</strong> Menos bibliotecas, tutoriales y herramientas de depuración. La revocación se resuelve con <code>tokens_validos_desde</code> por usuario, no con una lista de tokens.</p>
+</article>
+
+<article class="tarjeta" id="adr-0006">
+  <span class="tarjeta__num">ADR-0006</span>
+  <h3>Datos personales cifrados, con hash para poder buscar</h3>
+  <p><strong>Contexto.</strong> La Ley 1581 obliga a proteger nombre y correo, y el nombre del archivo entregado —que a menudo es <code>cv-juan-perez.pdf</code>—. Pero el correo es la credencial de entrada: hay que poder encontrar una fila por correo.</p>
+  <p><strong>Decisión.</strong> Tres mecanismos para tres problemas: <code>argon2id</code> para contraseñas; AES-256-GCM en un transformador de columna para PII; y una columna <code>correo_hash</code> con SHA-256 del correo normalizado, con el índice único encima.</p>
+  <p><strong>Descartado.</strong> Cifrar y buscar descifrando: obligaría a traer toda la tabla de usuarios en cada inicio de sesión.</p>
+  <p><strong>Consecuencia aceptada.</strong> El hash es determinista y permite confirmar si un correo está registrado. Se acepta porque el correo ya es la credencial; el contenido sigue cifrado con IV aleatorio.</p>
+</article>
+
+<article class="tarjeta" id="adr-0011">
+  <span class="tarjeta__num">ADR-0011</span>
+  <h3>Control de admisión: 503 antes de ahogarse</h3>
+  <p><strong>Contexto.</strong> La prueba de carga encontró cómo cae el sistema: no por errores, sino por congestión. A 50 iteraciones/s hace menos trabajo que a 30 y las latencias se multiplican.</p>
+  <p><strong>Decisión.</strong> Un tope de peticiones en vuelo —50 por omisión— que responde <strong>503 con <code>Retry-After</code></strong> al superarse. Va en un middleware porque en Nest el orden es middleware → guardias → interceptores → pipes: es el único sitio donde se rechaza antes de gastar validación, autenticación y una conexión a la base.</p>
+  <p><strong>Descartado.</strong> Subir el límite del rate limiting. El rate limiting protege de un abusador; esto protege del éxito. Son problemas distintos: aquí cada cliente se porta bien.</p>
+  <p><strong>Consecuencia aceptada.</strong> <span class="insignia insignia--parcial">pendiente de re-medir</span> El 503 existe, pero el número que lo dimensiona salió de una medición anterior al control. Falta confirmar el nuevo punto de caída.</p>
+</article>
+
+<article class="tarjeta" id="adr-0012">
+  <span class="tarjeta__num">ADR-0012</span>
+  <h3>A un recurso ajeno se responde 404, no 403</h3>
+  <p><strong>Contexto.</strong> Ningún reporte debe mostrar datos de otra empresa. Queda la pregunta de qué se responde a quien lo intenta.</p>
+  <p><strong>Decisión.</strong> 404 con el mismo mensaje que si el recurso no existiera, tanto si es de otra empresa, como si el candidato no fue invitado, como si el identificador es inventado. Cada caso se registra como <code>acceso_denegado_por_recurso</code> con quién lo intentó.</p>
+  <p><strong>Descartado.</strong> 403, que es lo que sugiere la semántica de HTTP, porque <strong>confirma que el recurso existe</strong>. Con esa diferencia se puede inventariar las vacantes de la competencia probando identificadores.</p>
+  <p><strong>Consecuencia aceptada.</strong> El cliente no distingue «no existe» de «no puedes verlo». El registro interno sí lo distingue; el atacante, no.</p>
+</article>
+
+<h2 id="evaluacion">Evaluación y archivos</h2>
+
+<article class="tarjeta" id="adr-0007">
+  <span class="tarjeta__num">ADR-0007</span>
+  <h3>La evaluación con IA va por cola, no en la petición</h3>
+  <p><strong>Contexto.</strong> Calificar implica llamar a un modelo: segundos en el mejor caso, un minuto cuando el proveedor va lento y un error que no depende de nosotros cuando se cae.</p>
+  <p><strong>Decisión.</strong> El candidato entrega y recibe respuesta inmediata; la evaluación se encola en BullMQ con reintentos de espera exponencial. El identificador del trabajo <strong>es el de la entrega</strong>, así que encolar dos veces no evalúa dos veces. <code>COLA_WORKER_HABILITADO</code> decide si un proceso consume la cola.</p>
+  <p><strong>Descartado.</strong> Evaluar dentro de la petición: el candidato esperaría un minuto frente a una barra y un fallo del proveedor se leería como «tu entrega falló» cuando está guardada. Una tabla de pendientes con cron es una cola peor, sin bloqueo ni reintento.</p>
+  <p><strong>Consecuencia aceptada.</strong> El estado es eventual: la nota no está al responder. El backend publica <code>evaluacion-finalizada</code> para que la interfaz y los reportes se enteren.</p>
+</article>
+
+<article class="tarjeta" id="adr-0008">
+  <span class="tarjeta__num">ADR-0008</span>
+  <h3>El servicio de IA es otro proceso y no recibe archivos</h3>
+  <p><strong>Contexto.</strong> Las entregas son archivos que sube gente de fuera: <code>.zip</code>, <code>.pdf</code>, <code>.ipynb</code>, <code>.sql</code>. Alguien tiene que extraer el texto y pedirle al modelo que lo califique.</p>
+  <p><strong>Decisión.</strong> Dos cosas: el servicio de IA vive en otro proceso y el backend le habla por HTTP; y ese servicio <strong>no recibe archivos</strong>, solo texto ya extraído. Si un formato no se puede leer, la entrega queda fallida con su motivo y <strong>no consume un intento</strong>.</p>
+  <p><strong>Descartado.</strong> Un solo proceso con el SDK del modelo dentro: pone la clave del proveedor en el mismo proceso que desempaqueta un archivo de un desconocido.</p>
+  <p><strong>Consecuencia aceptada.</strong> Dos despliegues y una frontera de red más. La extracción —la operación peligrosa— vive donde se le pueden poner límites de tamaño, número de archivos y rutas.</p>
+</article>
+
+<article class="tarjeta" id="adr-0009">
+  <span class="tarjeta__num">ADR-0009</span>
+  <h3>Almacenamiento compatible con S3, URLs firmadas</h3>
+  <p><strong>Contexto.</strong> Entregas de hasta 25 MiB. Guardarlas en PostgreSQL haría que cada respaldo de la base arrastrara gigabytes de <code>.zip</code>.</p>
+  <p><strong>Decisión.</strong> Objetos en un almacén compatible con S3, con <code>forcePathStyle</code> y URLs firmadas para subir y bajar: el archivo no pasa por el proceso de Node. Al arrancar se comprueba que el bucket existe, que no es público y que tiene retención. SeaweedFS en desarrollo, no MinIO.</p>
+  <p><strong>Descartado.</strong> Archivos en la base, que convierten cada restauración en horas; y el disco del contenedor, que no sobrevive a un reinicio ni se comparte entre copias.</p>
+  <p><strong>Consecuencia aceptada.</strong> Dos sistemas que respaldar y una credencial más que rotar. MinIO se descartó después de que retirara sus imágenes públicas y dejara la CI en rojo semanas.</p>
+</article>
+
+<h2 id="reportes">Reportes, avisos y consentimiento</h2>
+
+<article class="tarjeta" id="adr-0010">
+  <span class="tarjeta__num">ADR-0010</span>
+  <h3>Reportes compone en vivo y no guarda una copia</h3>
+  <p><strong>Contexto.</strong> Lo normal en analítica es proyectar: copiar las notas a tablas con la forma del informe. El Diccionario de la EDT lista «esquema de reportes» entre los recursos.</p>
+  <p><strong>Decisión.</strong> Reportes no tiene tablas de datos propias: compone en cada consulta lo que existe en evaluación, entregas, vacantes y autenticación, cada uno por su puerta pública. La única tabla propia es el registro de revelaciones de identidad, que es un dato nuevo y no puede desincronizarse.</p>
+  <p><strong>Descartado.</strong> Proyección materializada: una copia se desincroniza —un evento perdido, un reinicio a medias— y el informe contradice a la evaluación. En un producto que vende decisiones defendibles, eso es peor que la latencia.</p>
+  <p><strong>Consecuencia aceptada.</strong> El informe cuesta una consulta compuesta; medido, cabe en 64 ms p99. <span class="insignia insignia--parcial">disparador</span> Si pasa de 500 ms, se proyecta con reconstrucción y comprobación.</p>
+</article>
+
+<article class="tarjeta" id="adr-0013">
+  <span class="tarjeta__num">ADR-0013</span>
+  <h3>Cerrar una vacante avisa por correo, y el aviso no lleva el resultado</h3>
+  <p><strong>Contexto.</strong> Cerrar era silencioso: el candidato tenía que volver a entrar cada tanto a ver si el proceso terminó.</p>
+  <p><strong>Decisión.</strong> Al cerrar se publica <code>vacantes.vacante-cerrada</code> y un módulo nuevo, <code>notificaciones</code>, escribe a cada candidato con al menos una entrega evaluada. El correo dice que el proceso cerró y que el resultado está en la plataforma. Nada más.</p>
+  <p><strong>Descartado.</strong> Mandar nota, puesto y selección en el correo. Un correo viaja por servidores de terceros y se reenvía; el resultado se consulta autenticado, con la rúbrica que lo explica.</p>
+  <p><strong>Consecuencia aceptada.</strong> El correo nace apagado (<code>NOTIFICACIONES_A_CANDIDATOS</code>) y hay redirección de correo para probar. Un índice único <code>(vacante, candidato, tipo)</code> impide duplicar el aviso.</p>
+</article>
+
+<article class="tarjeta" id="adr-0014">
+  <span class="tarjeta__num">ADR-0014</span>
+  <h3>Los consentimientos son un historial que solo crece</h3>
+  <p><strong>Contexto.</strong> La Ley 1581 no pide un booleano: pide poder <strong>demostrar</strong> que el consentimiento se obtuvo, para qué finalidad y cuándo.</p>
+  <p><strong>Decisión.</strong> Una tabla que solo crece. Cada decisión guarda el tipo, si se concede o revoca, la versión del aviso leído y la pantalla de origen. Revocar inserta <code>concedido = false</code>; el estado actual es la fila más reciente de cada par (usuario, tipo). Sin unicidad y sin <code>UPDATE</code>. Nadie ve ni cambia los permisos de otra persona: el usuario sale del token.</p>
+  <p><strong>Descartado.</strong> Un booleano por permiso en <code>usuarios</code>: dice lo que la persona autoriza hoy y pierde todo lo demás. Un historial no se puede reconstruir después.</p>
+  <p><strong>Consecuencia aceptada.</strong> Hay que leer la fila más reciente para saber el estado, y el historial crece con cada cambio. Cada permiso declara además si alguien lo hace cumplir (<code>vigilado</code>).</p>
+</article>
+
+<h2 id="producto">Producto y equidad</h2>
+
+<article class="tarjeta" id="adr-0015">
+  <span class="tarjeta__num">ADR-0015</span>
+  <h3>Postularse, sin inventar un motor de afinidad</h3>
+  <p><strong>Contexto.</strong> El candidato solo veía vacantes a las que alguien lo invitó. Abrir el catálogo destapó una contradicción: A04 promete preselección por perfil de habilidades, B13 describe un % de afinidad, y el diseño prohíbe usar nombre o foto en la decisión.</p>
+  <p><strong>Decisión.</strong> Se cierra la mitad que no exige inventar nada: catálogo abierto sin puntuación de encaje, postulación que crea una solicitud <code>en_revision</code> y no da acceso al reto, y decisión del reclutador con motivo que el candidato lee.</p>
+  <p><strong>Descartado.</strong> Construirlo de paso: un % de afinidad requiere vocabulario de habilidades, perfil alimentado por evaluaciones y algoritmo de emparejamiento. Es una línea de trabajo con riesgo ético propio, no un añadido.</p>
+  <p><strong>Consecuencia aceptada.</strong> El catálogo funciona y no ordena por encaje. La mitad que falta queda nombrada, no simulada con una fórmula decorativa.</p>
+</article>
+
+<article class="tarjeta" id="adr-0016">
+  <span class="tarjeta__num">ADR-0016</span>
+  <h3>El % de afinidad sale de rúbricas calificadas y ordena sin esconder</h3>
+  <p><strong>Contexto.</strong> El ADR-0015 dejó el motor sin construir porque los criterios viven dentro de cada ejercicio. Cierto a medias: los criterios son locales, pero el nombre del criterio sí es un dato comparable.</p>
+  <p><strong>Decisión.</strong> Comparar los criterios de la vacante con el histórico de evaluaciones. Sin evidencia, la afinidad es <code>null</code>, no cero; la media se pondera solo sobre lo que tiene evidencia; siempre viaja con <code>cobertura</code> y desglose por criterio. Y la regla que más importa: <strong>ordena, nunca esconde</strong> —el catálogo devuelve todas las ofertas, incluidas las de afinidad <code>null</code>.</p>
+  <p><strong>Descartado.</strong> Afinidad declarada por el candidato, que sería una promesa sin evidencia y trasladaría el sesgo a quien más necesita que le crean.</p>
+  <p><strong>Consecuencia aceptada.</strong> Una oferta sin nada en común aparece al final, no desaparece. Hay una prueba de integración que lo fija. El porcentaje es una señal discutible, no una puerta.</p>
+</article>
+
+<article class="tarjeta" id="adr-0017">
+  <span class="tarjeta__num">ADR-0017</span>
+  <h3>Vocabulario de habilidades e invitación que solo dice sí</h3>
+  <p><strong>Contexto.</strong> «Claridad del código» y «Legibilidad» eran dos habilidades distintas para el cálculo, aunque una persona las juntaría. Y A04 promete invitar a los finalistas, que es la función más peligrosa del producto.</p>
+  <p><strong>Decisión.</strong> Un vocabulario de habilidades como <strong>tabla editable con alias</strong>, no como enum: los sectores se pueden enumerar de antemano, las habilidades no, porque cada reclutador escribe las de su rúbrica. Y la invitación automática con tres reglas: <strong>solo dice sí, nunca rechaza</strong>; sin evidencia se abstiene; y la decisión queda registrada.</p>
+  <p><strong>Descartado.</strong> Un enum cerrado de habilidades —imposible de mantener— y una invitación que también rechace: un rechazo automático es un algoritmo cerrando una puerta sin que nadie mire.</p>
+  <p><strong>Consecuencia aceptada.</strong> Los sinónimos se registran a mano y el vocabulario hay que curarlo. A cambio, la función que más riesgo tiene no puede descartar a nadie por su cuenta.</p>
+</article>
+
+<h2 id="revision">Decisiones con fecha de revisión</h2>
+<div class="aviso aviso--aviso">
+  <p class="aviso__titulo">Una decisión vigente no es una decisión eterna</p>
+  <p>
+    El ADR-0010 se revisa si el informe de una vacante pasa de 500 ms de p95. El ADR-0011 espera una
+    re-medición del punto de caída con el control de admisión puesto. El ADR-0013 está apagado por
+    omisión hasta que exista SMTP configurado y una prueba con remitente propio. Y el ADR-0001 se
+    revisa por un disparador organizativo, no técnico: el día que dos equipos necesiten desplegar a
+    ritmos distintos.
+  </p>
+</div>
+
+<div class="rejilla rejilla--2">
+  <div class="tarjeta">
+    <h3>Lo que un ADR no es</h3>
+    <p>No es documentación de cómo funciona el código —para eso están las páginas de Arquitectura, Backend e IA—. Es el registro de una elección entre alternativas, con la que se descartó y por qué. Si cambia el contexto, se escribe otro ADR; no se reescribe el anterior.</p>
+  </div>
+  <div class="tarjeta">
+    <h3>Las decisiones que no están aquí</h3>
+    <p>Las 22 decisiones de alcance (D-1 a D-22) viven en la <a href="requisitos.html#alcance">Declaración de Alcance</a>: qué se decide no hacer. Los ADR registran cómo se construyó lo que sí se hizo. Son dos documentos distintos porque responden preguntas distintas.</p>
+  </div>
+</div>
+      </div>
+      <nav class="paginacion" aria-label="Navegación entre páginas">
+        <a href="operacion.html"><span>← Anterior</span><strong>Operación</strong></a>
+        <a class="paginacion__siguiente" href="estado.html"><span>Siguiente →</span><strong>Estado del proyecto</strong></a>
+      </nav>
+    </main>
+    <aside id="sitio-toc" aria-label="Contenido de la página"></aside>
+  </div>
+  <div id="sitio-pie"></div>
+  <noscript>
+    <div style="max-width:900px;margin:0 auto;padding:24px">
+      <p><strong>La navegación lateral necesita JavaScript.</strong> Estas son las secciones:</p>
+      <ul>
+        <li><a href="index.html">MeritIA · Documentación</a></li>
+        <li><a href="arquitectura.html">Arquitectura</a></li>
+        <li><a href="frontend.html">Frontend</a></li>
+        <li><a href="backend.html">Backend</a></li>
+        <li><a href="ia.html">Servicio de IA</a></li>
+        <li><a href="rag.html">Mentor RAG</a></li>
+        <li><a href="leyes.html">Leyes y privacidad</a></li>
+        <li><a href="requisitos.html">Requisitos</a></li>
+        <li><a href="operacion.html">Operación</a></li>
+        <li><a href="decisiones.html">Decisiones de arquitectura</a></li>
+        <li><a href="estado.html">Estado del proyecto</a></li>
+      </ul>
+    </div>
+  </noscript>
+  <script src="assets/js/mermaid.min.js" defer></script>
+  <script src="assets/js/site.js" defer></script>
+</body>
+</html>

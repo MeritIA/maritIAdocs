@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="es" data-page="requisitos">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Requisitos · MeritIA</title>
+  <meta name="description" content="Requisitos funcionales y no funcionales, estado de implementación, decisiones de alcance y trazabilidad.">
+  <meta name="author" content="MeritIA">
+  <meta name="theme-color" content="#08080a" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f7f7f8" media="(prefers-color-scheme: light)">
+  <meta name="color-scheme" content="dark light">
+  <link rel="canonical" href="https://meritia.github.io/maritIAdocs/requisitos.html">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/img/logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/site.css">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MeritIA · Documentación">
+  <meta property="og:locale" content="es_CO">
+  <meta property="og:title" content="Requisitos · MeritIA">
+  <meta property="og:description" content="Requisitos funcionales y no funcionales, estado de implementación, decisiones de alcance y trazabilidad.">
+  <meta property="og:url" content="https://meritia.github.io/maritIAdocs/requisitos.html">
+  <meta property="og:image" content="https://meritia.github.io/maritIAdocs/assets/img/og.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Requisitos · MeritIA">
+  <meta name="twitter:description" content="Requisitos funcionales y no funcionales, estado de implementación, decisiones de alcance y trazabilidad.">
+  <meta name="twitter:image" content="https://meritia.github.io/maritIAdocs/assets/img/og.svg">
+  <script>
+    try { var t = localStorage.getItem('meritia-docs-tema'); if (t === 'claro') document.documentElement.dataset.tema = 'claro'; } catch (e) {}
+  </script>
+</head>
+<body>
+  <a class="salto" href="#contenido">Saltar al contenido</a>
+  <div id="sitio-barra"></div>
+  <div class="envoltura">
+    <aside id="sitio-lateral"></aside>
+    <main id="contenido" class="principal">
+      <div class="prosa">
+<header class="cabecera-pagina">
+  <span class="ceja">Requisitos</span>
+  <h1>Lo que el sistema promete, con la evidencia de dónde lo cumple.</h1>
+  <p class="entradilla">
+    76 requisitos funcionales y 20 no funcionales, cada uno atado a un endpoint, una pieza del código
+    o una prueba. De los funcionales, todos están implementados. De los no funcionales, la mayoría;
+    los que faltan son de operación y de verificación, y se marcan como tales.
+  </p>
+  <div class="metas">
+    <span class="meta">96 requisitos</span>
+    <span class="meta meta--acento">76 RF implementados</span>
+    <span class="meta">14 RNF completos</span>
+    <span class="meta">22 decisiones de alcance</span>
+  </div>
+</header>
+
+<div class="cifras" aria-label="Estado de los requisitos">
+  <div class="cifra"><span class="cifra__valor">76</span><span class="cifra__etiqueta">requisitos funcionales<br>implementados</span></div>
+  <div class="cifra"><span class="cifra__valor">14</span><span class="cifra__etiqueta">requisitos no funcionales<br>completos</span></div>
+  <div class="cifra"><span class="cifra__valor">2</span><span class="cifra__etiqueta">no funcionales<br>parciales</span></div>
+  <div class="cifra"><span class="cifra__valor">3</span><span class="cifra__etiqueta">no funcionales<br>pendientes o no medidos</span></div>
+</div>
+
+<h2 id="funcionales">Requisitos funcionales por área</h2>
+<p>
+  Cada fila del documento original enlaza el requisito con el símbolo que lo implementa y con la
+  pantalla que lo expone. Aquí se resume el alcance por área; el detalle vive en
+  <code>backend/docs/requisitos.md</code>.
+</p>
+<div class="tabla-envoltura">
+  <table>
+    <thead><tr><th>Área</th><th>Qué cubre</th><th>RF</th><th>Estado</th></tr></thead>
+    <tbody>
+      <tr><td>Autenticación e identidad</td><td>Registro, login, PASETO, cookie HttpOnly, cierre de sesiones, roles y promoción solo por administrador.</td><td>7</td><td><span class="insignia insignia--ok">completo</span></td></tr>
+      <tr><td>Empresas y aislamiento</td><td>Pertenencia a empresa, invisibilidad entre empresas, respuesta 404 a lo ajeno, sector cerrado y NIT opcional verificado.</td><td>4</td><td><span class="insignia insignia--ok">completo</span></td></tr>
+      <tr><td>Vacantes</td><td>Creación, edición, publicación, cierre, avance, invitaciones y cierre estimado que no cierra solo.</td><td>8</td><td><span class="insignia insignia--ok">completo</span></td></tr>
+      <tr><td>Ejercicios y rúbricas</td><td>Banco de retos, versiones y criterios con pesos que suman 100.</td><td>3</td><td><span class="insignia insignia--ok">completo</span></td></tr>
+      <tr><td>Entregas</td><td>Subida, tipos permitidos, límite de intentos, verificación con cámara o alterna, consentimiento exigido.</td><td>5</td><td><span class="insignia insignia--ok">completo</span></td></tr>
+      <tr><td>Evaluación con IA</td><td>Cola, reintentos, contrato con el servicio, nota por criterio, evento de finalización y consulta del estado.</td><td>8</td><td><span class="insignia insignia--ok">completo</span></td></tr>
+      <tr><td>Reportes</td><td>Ranking, reporte por candidato, auditoría, revelación de identidad con rastro y datos del titular.</td><td>9</td><td><span class="insignia insignia--ok">completo</span></td></tr>
+      <tr><td>Postulaciones y talento</td><td>Catálogo abierto, postulación, afinidad desde rúbricas, vocabulario de habilidades e invitación que solo acepta.</td><td>14</td><td><span class="insignia insignia--ok">completo</span></td></tr>
+      <tr><td>Consentimientos</td><td>Tres finalidades, historial, revocación, efecto real y permisos del titular sin identificador en la URL.</td><td>8</td><td><span class="insignia insignia--ok">completo</span></td></tr>
+      <tr><td>Notificaciones</td><td>Aviso de cierre sin resultado, nace apagado, redirección de correo y registro de pendientes.</td><td>6</td><td><span class="insignia insignia--ok">completo</span></td></tr>
+      <tr><td>Observabilidad</td><td>Salud de vida y de dependencias, alertas de seguridad, cola observable y registro con referencia.</td><td>4</td><td><span class="insignia insignia--ok">completo</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 id="no-funcionales">Requisitos no funcionales</h2>
+<div class="tabla-envoltura">
+  <table>
+    <thead><tr><th>ID</th><th>Requisito</th><th>Evidencia</th><th>Estado</th></tr></thead>
+    <tbody>
+      <tr><td>RNF-SEG-1</td><td>Autorización por endpoint, recurso y operación; IDOR imposible</td><td>Matriz de permisos y pruebas de aislamiento en cada módulo.</td><td><span class="insignia insignia--ok">completo</span></td></tr>
+      <tr><td>RNF-SEG-2</td><td>Datos personales cifrados en reposo; secretos fuera de Git</td><td>AES-256-GCM, hash de correo, Gitleaks en cada push.</td><td><span class="insignia insignia--ok">completo</span></td></tr>
+      <tr><td>RNF-SEG-3</td><td>Rate limiting en tres capas</td><td>IP, usuario y endpoints críticos, con almacenamiento en Redis.</td><td><span class="insignia insignia--ok">completo</span></td></tr>
+      <tr><td>RNF-SEG-4</td><td>Errores que no filtran trazas ni internos</td><td>Forma única de error con referencia UUID.</td><td><span class="insignia insignia--ok">completo</span></td></tr>
+      <tr><td>RNF-SEG-5</td><td>Toda vulnerabilidad deja una prueba de regresión</td><td>Práctica sostenida; no hay una métrica que lo demuestre.</td><td><span class="insignia insignia--neutra">práctica</span></td></tr>
+      <tr><td>RNF-SEG-6</td><td>Red team interno sobre las superficies del encuadre</td><td>Se practicó, sin umbral acordado ni informe cerrado.</td><td><span class="insignia insignia--parcial">parcial</span></td></tr>
+      <tr><td>RNF-CAL-1</td><td>TypeScript estricto; cero <code>any</code> y cero <code>catch</code> vacíos</td><td>Verificado por lint y revisión.</td><td><span class="insignia insignia--ok">completo</span></td></tr>
+      <tr><td>RNF-CAL-2</td><td>Cobertura de pruebas ≥ 80 %</td><td>89,6 % de líneas y 77 % de ramas en el backend.</td><td><span class="insignia insignia--ok">completo</span></td></tr>
+      <tr><td>RNF-CAL-3</td><td>Cinco niveles: unitario, integración, E2E, seguridad y concurrencia</td><td>Falta el E2E del flujo completo de negocio.</td><td><span class="insignia insignia--parcial">parcial</span></td></tr>
+      <tr><td>RNF-CAL-4</td><td>Migraciones versionadas; integridad en la base</td><td>23 migraciones y constraints; sin FK entre esquemas.</td><td><span class="insignia insignia--ok">completo</span></td></tr>
+      <tr><td>RNF-REN-1</td><td>≥ 75 peticiones por segundo sostenidas</td><td>79 pet/s medidas con k6.</td><td><span class="insignia insignia--ok">completo</span></td></tr>
+      <tr><td>RNF-REN-2</td><td>p95 dentro de objetivo en carga sana</td><td>83 ms a 30 iteraciones/s.</td><td><span class="insignia insignia--ok">completo</span></td></tr>
+      <tr><td>RNF-REN-3</td><td>Cero respuestas inesperadas hasta el punto de caída</td><td>Ningún escenario produjo un error inesperado; el sistema degrada por latencia.</td><td><span class="insignia insignia--ok">completo</span></td></tr>
+      <tr><td>RNF-REN-4</td><td>Rechazar explícitamente al pasar el límite (503 + <code>Retry-After</code>)</td><td>Implementado en el middleware (ADR-0011). El documento de requisitos todavía lo marca pendiente porque <strong>falta re-medir</strong> el punto de caída con el control puesto.</td><td><span class="insignia insignia--parcial">por re-medir</span></td></tr>
+      <tr><td>RNF-REN-5</td><td>Recuperar tras un pico en ≤ 60 s</td><td>No medido: el barrido no incluyó una prueba de recuperación.</td><td><span class="insignia insignia--pendiente">no medido</span></td></tr>
+      <tr><td>RNF-REN-6</td><td>Sin crecimiento sostenido de memoria bajo carga</td><td>Falta el <em>soak</em> de horas; sin él no se puede afirmar.</td><td><span class="insignia insignia--pendiente">no verificado</span></td></tr>
+      <tr><td>RNF-OPE-1</td><td>El entorno local se levanta con un comando</td><td><code>docker compose up</code>.</td><td><span class="insignia insignia--ok">completo</span></td></tr>
+      <tr><td>RNF-OPE-2</td><td>Servicios separados; imagen no-root y healthcheck</td><td>Compose y Dockerfiles endurecidos.</td><td><span class="insignia insignia--ok">completo</span></td></tr>
+      <tr><td>RNF-OPE-3</td><td>Configuración por entorno validada al arrancar</td><td>Esquema de variables que impide arrancar con valores inseguros.</td><td><span class="insignia insignia--ok">completo</span></td></tr>
+      <tr><td>RNF-OPE-4</td><td>Contrato OpenAPI publicado</td><td>83 operaciones generadas desde el código y verificadas en CI.</td><td><span class="insignia insignia--ok">completo</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="aviso aviso--aviso">
+  <p class="aviso__titulo">Dos documentos, dos fechas</p>
+  <p>
+    El control de admisión se implementó después de la última actualización de la tabla de
+    requisitos. Cuando el código y un documento no coinciden, esta página sigue al código y lo dice:
+    el 503 existe, pero el número que lo dimensiona sigue esperando la re-medición que exige el
+    ADR-0011.
+  </p>
+</div>
+
+<h2 id="alcance">Las 22 decisiones de alcance</h2>
+<p>
+  La declaración de alcance fija lo que el producto decide <em>no</em> hacer, para que no vuelva a
+  discutirse cada mes. Estas son las decisiones y su consecuencia aceptada.
+</p>
+
+<div class="tabla-envoltura">
+  <table>
+    <thead><tr><th>ID</th><th>Decisión</th><th>Consecuencia</th></tr></thead>
+    <tbody>
+      <tr><td>D-1</td><td>En el ranking puntúa el mejor intento, no el último.</td><td>Los reintentos muestran lo que la persona sabe; el detalle conserva todos los intentos. Pendiente de ratificación del dueño del producto.</td></tr>
+      <tr><td>D-2</td><td>El servicio de IA no es dependencia crítica del health check.</td><td>Sin IA se siguen recibiendo entregas; la cola evalúa al volver.</td></tr>
+      <tr><td>D-3</td><td>Reportes compone en vivo y no guarda copia.</td><td>Una copia se desincroniza; el informe medido cabe en 64 ms p99.</td></tr>
+      <tr><td>D-4</td><td>SeaweedFS en desarrollo, no MinIO.</td><td>MinIO retiró sus imágenes públicas; producción puede usar S3 real.</td></tr>
+      <tr><td>D-5</td><td>La decisión D-1 espera ratificación del producto.</td><td>Es negocio, no técnica; queda escrita como pendiente.</td></tr>
+      <tr><td>D-6</td><td>El sector de una empresa sale de una lista cerrada de 14 entradas.</td><td>Se puede agrupar; la CIIU tiene más de 500 clases y nadie la elige bien al registrarse.</td></tr>
+      <tr><td>D-7</td><td>El NIT es opcional; si se declara, se verifica el dígito y es único.</td><td>No se simula una validación con Cámara de Comercio que no existe.</td></tr>
+      <tr><td>D-8</td><td>El candidato ve su puesto y el total solo con la vacante cerrada.</td><td>En vivo sería un canal lateral sobre la actividad de terceros; sin referencia, la nota no se interpreta.</td></tr>
+      <tr><td>D-9</td><td>Cerrar una vacante no revela identidades; contratar no exige haberlas revelado.</td><td>No se vuelca la lista de nombres al cerrar. Revelar es un acto explícito y auditado.</td></tr>
+      <tr><td>D-10</td><td>El correo de cierre no lleva nota, puesto ni selección.</td><td>El resultado se consulta autenticado, con la rúbrica que lo explica.</td></tr>
+      <tr><td>D-11</td><td>Los avisos a candidatos nacen apagados y hay redirección de correo.</td><td>Configurar SMTP para alertas no empieza a escribir a candidatos reales por rebote.</td></tr>
+      <tr><td>D-12</td><td>El avance es el porcentaje de invitados evaluados; <code>null</code> sin invitados.</td><td>La barra no retrocede si el plan cambia, y «0 %» no se confunde con «no ha empezado».</td></tr>
+      <tr><td>D-13</td><td>El cierre estimado no cierra la vacante; se aceptan fechas pasadas.</td><td>Un reloj no dispara correos a personas reales; un proceso vencido se muestra como vencido.</td></tr>
+      <tr><td>D-14</td><td>Los consentimientos son un historial que solo crece.</td><td>Se puede demostrar qué autorizó una persona en marzo; un booleano no.</td></tr>
+      <tr><td>D-15</td><td>Decisión original: registrar permisos sin hacerlos cumplir.</td><td>Quedó superada por D-17 y D-18. Hoy las tres finalidades del catálogo sí se hacen cumplir.</td></tr>
+      <tr><td>D-16</td><td>«Datos para el Mentor IA» nace apagado aunque B24 lo mostraba encendido.</td><td>B12 nunca lo pide; nadie lo autorizó. D-18 lo retiró del catálogo.</td></tr>
+      <tr><td>D-17</td><td>La calificación por IA es revocable y bloquea entregas nuevas.</td><td>No deshace lo ya evaluado. La revocación mira hacia adelante.</td></tr>
+      <tr><td>D-18</td><td>Manda el Taller 2: tres finalidades; el perfil no se publica sin permiso y «Datos para el Mentor IA» se retira.</td><td>El BPM publicaba el perfil de todo el mundo; la decisión corrige ese defecto.</td></tr>
+      <tr><td>D-19</td><td>Decisión inicial: abrir el catálogo y permitir postularse sin motor de afinidad.</td><td>Se amplió después con D-20 a D-22: hoy hay afinidad informativa e invitación automática que solo acepta.</td></tr>
+      <tr><td>D-20</td><td>La afinidad sale de rúbricas ya calificadas, no de un CV declarado.</td><td>Es <code>null</code> sin evidencia, siempre lleva cobertura y ordena sin esconder ofertas.</td></tr>
+      <tr><td>D-21</td><td>Vocabulario de habilidades de plataforma, con alias y tabla editable.</td><td>Une «Legibilidad» con «Claridad del código». Los sinónimos se registran a mano.</td></tr>
+      <tr><td>D-22</td><td>La invitación automática solo dice sí; nunca rechaza.</td><td>Sin evidencia se abstiene. Un rechazo automático sería un algoritmo cerrando la puerta sin que nadie mire.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 id="trazabilidad">Cómo se verifica un requisito</h2>
+<p>
+  La trazabilidad no es un documento aparte: el contrato OpenAPI se genera desde el código y la CI
+  compara el archivo publicado con lo que el código produce. Si una operación cambia y el documento
+  no, el pipeline falla antes de publicar la imagen.
+</p>
+<div class="diagrama">
+  <div class="diagrama__cabecera"><span class="punto"></span>De la promesa a la verificación</div>
+  <div class="diagrama__lienzo">
+    <div class="mermaid">
+flowchart LR
+  RF["Requisito<br/>RF-CON-2"] --> API["Operación<br/>PUT /autenticacion/consentimientos"]
+  API --> COD["Código<br/>consentimientos.service"]
+  COD --> T["Pruebas<br/>unitarias e integración"]
+  API --> OAS["OpenAPI<br/>generado desde decoradores"]
+  OAS --> CI["CI<br/>--check del contrato"]
+  T --> CI
+  CI --> PANT["Pantalla<br/>B24 · Mi cuenta"]
+    </div>
+  </div>
+  <div class="diagrama__pie">Un requisito sin operación, sin prueba y sin pantalla es una intención. El proyecto intenta que cada fila tenga las tres.</div>
+</div>
+
+<h2 id="fuera">Lo que queda fuera, a propósito</h2>
+<ul>
+  <li><strong>Pagos reales y pasarela.</strong> El saldo y los retiros existen como pantalla y decisión de producto; no mueven dinero. Por eso no se activan las obligaciones de una pasarela.</li>
+  <li><strong>Procesamiento de PDF y DOCX.</strong> Se admiten al subir, pero la extracción de texto no los lee; la entrega falla con motivo y no consume intento.</li>
+  <li><strong>Analítica avanzada y métricas por grupo demográfico.</strong> Exigirían recoger datos que la plataforma no recoge y que aumentarían el riesgo de discriminación.</li>
+  <li><strong>Motor de afinidad como filtro.</strong> Ordena, no esconde ofertas. Un algoritmo decidiendo qué ve cada persona es justo lo que la auditoría de equidad vigila.</li>
+  <li><strong>Chatbot general y entrenamiento con entregas.</strong> El mentor responde sobre resultados y material de estudio; no es un asistente libre ni usa las entregas para entrenar.</li>
+  <li><strong>Alta disponibilidad y Kubernetes.</strong> El producto no tiene la escala que los justifica; el plan de escalado tiene disparadores medibles.</li>
+</ul>
+      </div>
+      <nav class="paginacion" aria-label="Navegación entre páginas">
+        <a href="leyes.html"><span>← Anterior</span><strong>Leyes y privacidad</strong></a>
+        <a class="paginacion__siguiente" href="operacion.html"><span>Siguiente →</span><strong>Operación</strong></a>
+      </nav>
+    </main>
+    <aside id="sitio-toc" aria-label="Contenido de la página"></aside>
+  </div>
+  <div id="sitio-pie"></div>
+  <noscript>
+    <div style="max-width:900px;margin:0 auto;padding:24px">
+      <p><strong>La navegación lateral necesita JavaScript.</strong> Estas son las secciones:</p>
+      <ul>
+        <li><a href="index.html">MeritIA · Documentación</a></li>
+        <li><a href="arquitectura.html">Arquitectura</a></li>
+        <li><a href="frontend.html">Frontend</a></li>
+        <li><a href="backend.html">Backend</a></li>
+        <li><a href="ia.html">Servicio de IA</a></li>
+        <li><a href="rag.html">Mentor RAG</a></li>
+        <li><a href="leyes.html">Leyes y privacidad</a></li>
+        <li><a href="requisitos.html">Requisitos</a></li>
+        <li><a href="operacion.html">Operación</a></li>
+        <li><a href="decisiones.html">Decisiones de arquitectura</a></li>
+        <li><a href="estado.html">Estado del proyecto</a></li>
+      </ul>
+    </div>
+  </noscript>
+  <script src="assets/js/mermaid.min.js" defer></script>
+  <script src="assets/js/site.js" defer></script>
+</body>
+</html>

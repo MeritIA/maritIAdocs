@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="es" data-page="rag">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Mentor RAG · MeritIA</title>
+  <meta name="description" content="Recuperación híbrida BM25 y vectores con fusión RRF, respuestas con fuentes y límites explícitos del mentor.">
+  <meta name="author" content="MeritIA">
+  <meta name="theme-color" content="#08080a" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f7f7f8" media="(prefers-color-scheme: light)">
+  <meta name="color-scheme" content="dark light">
+  <link rel="canonical" href="https://meritia.github.io/maritIAdocs/rag.html">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/img/logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/site.css">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MeritIA · Documentación">
+  <meta property="og:locale" content="es_CO">
+  <meta property="og:title" content="Mentor RAG · MeritIA">
+  <meta property="og:description" content="Recuperación híbrida BM25 y vectores con fusión RRF, respuestas con fuentes y límites explícitos del mentor.">
+  <meta property="og:url" content="https://meritia.github.io/maritIAdocs/rag.html">
+  <meta property="og:image" content="https://meritia.github.io/maritIAdocs/assets/img/og.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Mentor RAG · MeritIA">
+  <meta name="twitter:description" content="Recuperación híbrida BM25 y vectores con fusión RRF, respuestas con fuentes y límites explícitos del mentor.">
+  <meta name="twitter:image" content="https://meritia.github.io/maritIAdocs/assets/img/og.svg">
+  <script>
+    try { var t = localStorage.getItem('meritia-docs-tema'); if (t === 'claro') document.documentElement.dataset.tema = 'claro'; } catch (e) {}
+  </script>
+</head>
+<body>
+  <a class="salto" href="#contenido">Saltar al contenido</a>
+  <div id="sitio-barra"></div>
+  <div class="envoltura">
+    <aside id="sitio-lateral"></aside>
+    <main id="contenido" class="principal">
+      <div class="prosa">
+<header class="cabecera-pagina">
+  <span class="ceja">Mentor RAG</span>
+  <h1>Recuperar por dos caminos y citar de dónde salió cada consejo.</h1>
+  <p class="entradilla">
+    <code>rag-service</code> es un servicio FastAPI que combina los resultados del candidato con
+    material de estudio. Busca por palabras con BM25 y por significado con vectores, fusiona las dos
+    listas por posición y obliga al modelo a citar los fragmentos que usó. Si no hay material, lo dice
+    en vez de improvisar.
+  </p>
+  <div class="metas">
+    <span class="meta">FastAPI</span>
+    <span class="meta">Python 3.11+</span>
+    <span class="meta meta--acento">BM25 + vectores</span>
+    <span class="meta">Fusión RRF</span>
+    <span class="meta">40 fragmentos</span>
+  </div>
+</header>
+
+<h2 id="problema">El problema que resuelve</h2>
+<p>
+  Un candidato que sacó 58 en «Eficiencia» no necesita un chatbot genérico: necesita saber qué falló
+  y qué estudiar. La pregunta sola —«¿cómo mejoro?»— no alcanza para recuperar material útil. Por eso
+  la consulta se construye con tres cosas: la pregunta, los criterios por debajo del 60 % y la
+  evidencia que dejó el evaluador.
+</p>
+
+<div class="diagrama diagrama--ancho">
+  <div class="diagrama__cabecera"><span class="punto"></span>Pipeline de recuperación y respuesta</div>
+  <div class="diagrama__lienzo">
+    <div class="mermaid">
+flowchart TB
+  E["Entrada<br/>pregunta + perfil + evidencia"] --> Q["Consulta enriquecida<br/>criterios flojos &lt; 60 %"]
+  Q --> BM["BM25<br/>top 20 por palabras"]
+  Q --> VE["Vectores<br/>top 20 por significado"]
+  BM --> RRF["Fusión RRF<br/>posiciones, no puntajes"]
+  VE --> RRF
+  RRF --> T4["Top 4 fragmentos"]
+  T4 --> P["Prompt<br/>resumen + fragmentos [1..4] + pregunta"]
+  P --> LLM["Gemini<br/>respuesta ≤ 120 palabras"]
+  LLM --> V["Validación<br/>citas existentes · JSON"]
+  V --> R["Respuesta + fuentes<br/>con rango léxico y semántico"]
+    </div>
+  </div>
+  <div class="diagrama__pie">La consulta no es solo la pregunta: un «¿cómo mejoro?» recupera material sobre lo que de verdad le falla al candidato.</div>
+</div>
+
+<h2 id="hibrido">Por qué híbrido, y por qué RRF</h2>
+<div class="rejilla rejilla--2">
+  <div class="tarjeta">
+    <span class="tarjeta__num">BM25</span>
+    <h3>Acierta con el término exacto</h3>
+    <p><code>O(n²)</code>, <code>off-by-one</code>, <code>STAR</code>: si el material y la duda comparten la palabra, BM25 la encuentra. Falla con sinónimos y con paráfrasis.</p>
+  </div>
+  <div class="tarjeta">
+    <span class="tarjeta__num">Vectores</span>
+    <h3>Entiende el significado</h3>
+    <p>«Mi código es lento» se acerca a «eficiencia y complejidad» sin compartir palabras. Puede dejar escapar un término raro que sí importaba.</p>
+  </div>
+  <div class="tarjeta">
+    <span class="tarjeta__num">RRF</span>
+    <h3>Fusiona posiciones, no puntajes</h3>
+    <p>Un BM25 de 7,3 y un coseno de 0,81 no están en la misma escala. Ponderarlos obliga a calibrar pesos que se rompen al cambiar de modelo o de corpus. RRF solo necesita el orden de cada recuperador.</p>
+  </div>
+  <div class="tarjeta">
+    <span class="tarjeta__num">Cita</span>
+    <h3>El consejo se puede verificar</h3>
+    <p>Cada fuente trae título, archivo, extracto y la posición que le dio cada recuperador. Si el modelo no cita nada, igual se devuelven los fragmentos que vio. Las citas a fragmentos inexistentes se descartan.</p>
+  </div>
+</div>
+
+<h2 id="contrato">El contrato</h2>
+<p>
+  Es el mismo del mentor del <code>ai-service</code> más el campo <code>fuentes</code>. El backend
+  apunta a uno u otro sin cambiar su cliente. El servicio no guarda estado: el resumen y los últimos
+  turnos llegan en cada petición.
+</p>
+
+<pre data-lenguaje="http"><code>POST /api/v1/mentor
+Authorization: Bearer &lt;CLAVE_DE_ACCESO&gt;
+
+{
+  "contexto": {
+    "totalEvaluaciones": 4,
+    "promedio": 61,
+    "perfil": [
+      { "nombre": "Eficiencia", "porcentaje": 55, "veces": 4 },
+      { "nombre": "Claridad", "porcentaje": 89, "veces": 4 }
+    ],
+    "recientes": [
+      {
+        "reto": "Invertir una lista enlazada",
+        "nota": 58,
+        "flojo": {
+          "criterio": "Eficiencia",
+          "porcentaje": 55,
+          "evidencia": "Recorre la lista dos veces y usa una lista auxiliar."
+        }
+      }
+    ]
+  },
+  "historial": [
+    { "rol": "candidato", "texto": "¿Cómo mejoro en eficiencia?" },
+    { "rol": "mentor", "texto": "Empieza por medir el recorrido…" }
+  ],
+  "pregunta": "¿Qué debería estudiar primero?"
+}</code></pre>
+
+<pre data-lenguaje="json"><code>{
+  "respuesta": "Tu punto más flojo es el recorrido doble. Estudia complejidad espacial y luego reescribe el ejercicio usando dos punteros [2].",
+  "sugerencias": ["¿Cómo mido el costo espacial?", "Muéstrame un ejemplo", "¿Qué sigue después?"],
+  "fuentes": [
+    {
+      "n": 2,
+      "id": "eficiencia-y-complejidad.md#3",
+      "titulo": "Eficiencia y complejidad algorítmica > Errores comunes",
+      "archivo": "eficiencia-y-complejidad.md",
+      "extracto": "Recorrer dos veces suele duplicar el costo…",
+      "puntaje": 0.032,
+      "rangoLexico": 1,
+      "rangoSemantico": 4
+    }
+  ],
+  "proveedor": "gemini",
+  "modelo": "gemini-3.5-flash",
+  "vectorizador": "gemini"
+}</code></pre>
+
+<div class="tabla-envoltura">
+  <table class="tabla-compacta">
+    <thead><tr><th>Límite del contrato</th><th>Valor</th></tr></thead>
+    <tbody>
+      <tr><td>Pregunta</td><td>1 a 500 caracteres</td></tr>
+      <tr><td>Perfil</td><td>Hasta 12 criterios, cada uno con porcentaje y número de veces</td></tr>
+      <tr><td>Evaluaciones recientes</td><td>Hasta 3, con una sola debilidad por evaluación</td></tr>
+      <tr><td>Historial</td><td>Hasta 50 turnos en el contrato; el servicio usa los últimos 6 y recorta a 400 caracteres cada uno</td></tr>
+      <tr><td>Respuesta</td><td>Máximo 120 palabras, 3 sugerencias y 1.500 tokens de salida</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3>Los otros dos endpoints</h3>
+<pre data-lenguaje="http"><code>GET /api/v1/conocimiento/buscar?q=complejidad+espacial&amp;k=4
+GET /api/v1/salud</code></pre>
+<p>
+  La búsqueda devuelve los mismos fragmentos con sus rangos, sin llamar al modelo. Sirve para depurar
+  la recuperación y para comprobar que un documento entró al índice.
+</p>
+
+<h2 id="corpus">El corpus</h2>
+<p>
+  Siete documentos en Markdown, troceados en 40 fragmentos de hasta 900 caracteres. El corte es por
+  sección <code>##</code>; las secciones largas se parten por párrafos. El título entra en el índice
+  porque aporta términos que el cuerpo puede no repetir.
+</p>
+<div class="tabla-envoltura">
+  <table class="tabla-compacta">
+    <thead><tr><th>Documento</th><th>Qué cubre</th></tr></thead>
+    <tbody>
+      <tr><td><code>claridad-y-legibilidad.md</code></td><td>Nombres, estructura, formato y legibilidad del código.</td></tr>
+      <tr><td><code>correccion-y-casos-borde.md</code></td><td>Corrección, entradas vacías, límites y errores frecuentes.</td></tr>
+      <tr><td><code>eficiencia-y-complejidad.md</code></td><td>Complejidad temporal y espacial, recorridos y estructuras.</td></tr>
+      <tr><td><code>entrevista-y-comunicacion.md</code></td><td>Cómo explicar decisiones y comunicar en una entrevista técnica.</td></tr>
+      <tr><td><code>integridad-y-uso-de-ia.md</code></td><td>Uso permitido de herramientas y honestidad en la prueba.</td></tr>
+      <tr><td><code>leer-una-evaluacion.md</code></td><td>Cómo interpretar el desglose y convertirlo en un plan de estudio.</td></tr>
+      <tr><td><code>pruebas-y-validacion.md</code></td><td>Pruebas, validación de entradas y casos que se olvidan.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="aviso aviso--aviso">
+  <p class="aviso__titulo">40 fragmentos son un corpus pequeño</p>
+  <p>
+    Alcanza para cubrir las debilidades que el producto sabe detectar, pero no es una enciclopedia.
+    Si la pregunta se sale del material, la instrucción es decirlo y no improvisar. El recuperador no
+    puede citar lo que no existe, y la validación descarta las citas a fragmentos inexistentes.
+  </p>
+</div>
+
+<h2 id="configuracion">Configuración</h2>
+<div class="tabla-envoltura">
+  <table>
+    <thead><tr><th>Variable</th><th>Por omisión</th><th>Qué hace</th></tr></thead>
+    <tbody>
+      <tr><td><code>CLAVE_DE_ACCESO</code></td><td>— obligatoria</td><td>Secreto compartido con el backend; mínimo 32 caracteres.</td></tr>
+      <tr><td><code>PROVEEDOR_IA</code></td><td><code>gemini</code></td><td><code>gemini</code> o <code>simulado</code>. El simulado responde con el mejor fragmento y no gasta cuota.</td></tr>
+      <tr><td><code>EMBEDDINGS</code></td><td><code>gemini</code></td><td><code>gemini</code> o <code>hash</code>. El hash es local y no semántico; sirve para desarrollar.</td></tr>
+      <tr><td><code>GEMINI_MODELO</code></td><td><code>gemini-3.5-flash</code></td><td>Modelo que redacta la respuesta.</td></tr>
+      <tr><td><code>GEMINI_MODELO_EMBEDDINGS</code></td><td><code>gemini-embedding-001</code></td><td>Modelo de vectores; 768 dimensiones por omisión.</td></tr>
+      <tr><td><code>K_CANDIDATOS</code></td><td>20</td><td>Cuántos trae cada recuperador antes de fusionar.</td></tr>
+      <tr><td><code>K_FINAL</code></td><td>4</td><td>Cuántos fragmentos llegan al modelo.</td></tr>
+      <tr><td><code>RRF_K</code></td><td>60</td><td>Constante de RRF; subirla aplana la diferencia entre posiciones.</td></tr>
+      <tr><td><code>TIEMPO_MAXIMO_MS</code></td><td>30.000</td><td>Tiempo máximo por llamada al proveedor.</td></tr>
+    </tbody>
+  </table>
+</div>
+<p>
+  En producción el servicio se niega a arrancar con <code>PROVEEDOR_IA=simulado</code> o
+  <code>EMBEDDINGS=hash</code>, y apaga la documentación interactiva. La primera vectorización del
+  corpus se guarda en <code>.cache/</code> y se invalida sola por huella del contenido y del modelo.
+</p>
+
+<h2 id="defensas">Defensas y transparencia</h2>
+<ul>
+  <li><strong>La pregunta es dato, no instrucción.</strong> Va dentro de un delimitador aleatorio y el prompt lo dice explícitamente.</li>
+  <li><strong>Historial acotado.</strong> Seis turnos de 400 caracteres: lo suficiente para el hilo, no para arrastrar una inyección de veinte mensajes.</li>
+  <li><strong>Salida validada.</strong> JSON con respuesta, hasta tres sugerencias y los números citados. Las citas fuera del conjunto recuperado se descartan.</li>
+  <li><strong>Errores sin detalle.</strong> Mismo formato que el <code>ai-service</code>, con <code>reintentable</code>. El log nunca lleva la pregunta ni la respuesta.</li>
+  <li><strong>Sin estado ni acceso a datos.</strong> No hay forma de pedir información de otro candidato: el contexto llega en la petición y nada se guarda.</li>
+</ul>
+
+<h2 id="operacion">Operación</h2>
+<p>
+  El servicio no necesita base de datos, Redis ni otros servicios. Se levanta con Docker o con
+  Uvicorn; al arrancar indexa el corpus (un segundo con vectores locales). El contenedor puede correr
+  con sistema de ficheros de solo lectura salvo la caché, sin capacidades del kernel y con límites de
+  recursos.
+</p>
+<pre data-lenguaje="bash"><code># Desarrollo, sin API key y sin red
+python -m uvicorn app.main:app_por_omision --factory --port 3200 --reload
+
+# Producción
+APP_ENV=production PROVEEDOR_IA=gemini EMBEDDINGS=gemini \
+  CLAVE_DE_ACCESO=... GEMINI_API_KEY=... \
+  python -m uvicorn app.main:app_por_omision --factory --port 3200</code></pre>
+
+<h2 id="limites">Límites conocidos</h2>
+<ul>
+  <li><strong>Sin reordenador.</strong> RRF fusiona y corta en cuatro; no hay un modelo que relea y reordene los candidatos. Un reordenador mejoraría la precisión a cambio de latencia y costo.</li>
+  <li><strong>El corpus no crece solo.</strong> Añadir conocimiento exige escribir el Markdown y reiniciar para reindexar. No hay ingesta automática ni panel de administración.</li>
+  <li><strong>El modo <code>hash</code> no entiende sinónimos.</strong> Es una comodidad de desarrollo; en producción se exige <code>gemini</code>.</li>
+  <li><strong>La memoria es del cliente.</strong> El servicio no recuerda la conversación: si el backend no reenvía el historial, el mentor empieza de cero.</li>
+  <li><strong>No evalúa ni cambia notas.</strong> Su instrucción lo prohíbe explícitamente y no tiene acceso a la base para hacerlo.</li>
+</ul>
+      </div>
+      <nav class="paginacion" aria-label="Navegación entre páginas">
+        <a href="ia.html"><span>← Anterior</span><strong>Servicio de IA</strong></a>
+        <a class="paginacion__siguiente" href="leyes.html"><span>Siguiente →</span><strong>Leyes y privacidad</strong></a>
+      </nav>
+    </main>
+    <aside id="sitio-toc" aria-label="Contenido de la página"></aside>
+  </div>
+  <div id="sitio-pie"></div>
+  <noscript>
+    <div style="max-width:900px;margin:0 auto;padding:24px">
+      <p><strong>La navegación lateral necesita JavaScript.</strong> Estas son las secciones:</p>
+      <ul>
+        <li><a href="index.html">MeritIA · Documentación</a></li>
+        <li><a href="arquitectura.html">Arquitectura</a></li>
+        <li><a href="frontend.html">Frontend</a></li>
+        <li><a href="backend.html">Backend</a></li>
+        <li><a href="ia.html">Servicio de IA</a></li>
+        <li><a href="rag.html">Mentor RAG</a></li>
+        <li><a href="leyes.html">Leyes y privacidad</a></li>
+        <li><a href="requisitos.html">Requisitos</a></li>
+        <li><a href="operacion.html">Operación</a></li>
+        <li><a href="decisiones.html">Decisiones de arquitectura</a></li>
+        <li><a href="estado.html">Estado del proyecto</a></li>
+      </ul>
+    </div>
+  </noscript>
+  <script src="assets/js/mermaid.min.js" defer></script>
+  <script src="assets/js/site.js" defer></script>
+</body>
+</html>

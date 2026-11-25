@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="es" data-page="frontend">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Frontend · MeritIA</title>
+  <meta name="description" content="Angular 21 sin zonas, signals, rutas diferidas, guardias de rol, diseño con tokens y una sola app para web y Android.">
+  <meta name="author" content="MeritIA">
+  <meta name="theme-color" content="#08080a" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f7f7f8" media="(prefers-color-scheme: light)">
+  <meta name="color-scheme" content="dark light">
+  <link rel="canonical" href="https://meritia.github.io/maritIAdocs/frontend.html">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/img/logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/site.css">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MeritIA · Documentación">
+  <meta property="og:locale" content="es_CO">
+  <meta property="og:title" content="Frontend · MeritIA">
+  <meta property="og:description" content="Angular 21 sin zonas, signals, rutas diferidas, guardias de rol, diseño con tokens y una sola app para web y Android.">
+  <meta property="og:url" content="https://meritia.github.io/maritIAdocs/frontend.html">
+  <meta property="og:image" content="https://meritia.github.io/maritIAdocs/assets/img/og.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Frontend · MeritIA">
+  <meta name="twitter:description" content="Angular 21 sin zonas, signals, rutas diferidas, guardias de rol, diseño con tokens y una sola app para web y Android.">
+  <meta name="twitter:image" content="https://meritia.github.io/maritIAdocs/assets/img/og.svg">
+  <script>
+    try { var t = localStorage.getItem('meritia-docs-tema'); if (t === 'claro') document.documentElement.dataset.tema = 'claro'; } catch (e) {}
+  </script>
+</head>
+<body>
+  <a class="salto" href="#contenido">Saltar al contenido</a>
+  <div id="sitio-barra"></div>
+  <div class="envoltura">
+    <aside id="sitio-lateral"></aside>
+    <main id="contenido" class="principal">
+      <div class="prosa">
+<header class="cabecera-pagina">
+  <span class="ceja">Frontend</span>
+  <h1>Una sola aplicación para web y Android, sin zonas y con los tokens como ley.</h1>
+  <p class="entradilla">
+    Angular 21 con detección de cambios sin <code>zone.js</code>, componentes standalone, signals y
+    carga diferida por ruta. La misma base de código se empaqueta como APK con Capacitor; lo que
+    cambia entre plataformas está aislado en una carpeta y no se repite en las pantallas.
+  </p>
+  <div class="metas">
+    <span class="meta">Angular 21.2</span>
+    <span class="meta">PrimeNG 21</span>
+    <span class="meta">Capacitor 8</span>
+    <span class="meta meta--acento">Zoneless</span>
+    <span class="meta">33 rutas</span>
+  </div>
+</header>
+
+<h2 id="organizacion">Cómo está organizado</h2>
+<p>
+  La aplicación se divide en cuatro capas con una regla simple: una pantalla no vuelve a resolver
+  lo que ya está resuelto en el núcleo. Cargar datos, enviar formularios, renovar la sesión y avisar
+  de un fallo tienen un único sitio.
+</p>
+
+<div class="diagrama">
+  <div class="diagrama__cabecera"><span class="punto"></span>Capas del cliente</div>
+  <div class="diagrama__lienzo">
+    <div class="mermaid">
+flowchart TB
+  subgraph Pres["Presentación"]
+    F["funciones/&lt;área&gt;<br/>pantallas standalone y diferidas"]
+    M["layout/marco<br/>barra · navegación · salida"]
+  end
+
+  subgraph Nucleo["Núcleo"]
+    S["sesion/<br/>identidad y guardias"]
+    H["http/<br/>credenciales · renovación · avisos"]
+    A["api/<br/>un servicio por módulo"]
+    E["estado/<br/>recurso() y accion()"]
+  end
+
+  subgraph Comp["Compartido"]
+    U["ui/<br/>campos · tablas · desglose"]
+    D["dominio/<br/>formatos y modelos"]
+  end
+
+  B["Backend /api/v1"]
+
+  F --> S
+  F --> E
+  F --> U
+  M --> S
+  E --> A
+  A --> H
+  H --> B
+  S --> A
+  U --> D
+    </div>
+  </div>
+  <div class="diagrama__pie">Las pantallas consumen el núcleo; el núcleo es el único que habla con la API. Ningún componente escribe una llamada HTTP a mano.</div>
+</div>
+
+<div class="rejilla rejilla--2">
+  <div class="tarjeta">
+    <span class="tarjeta__num">Decisión 1</span>
+    <h3>Los tokens mandan</h3>
+    <p>Ningún componente escribe un color, una fuente ni un espaciado literal. Todo sale de <code>src/styles/_tokens.scss</code>. El tema claro existe porque redefine color y no toca nada más.</p>
+  </div>
+  <div class="tarjeta">
+    <span class="tarjeta__num">Decisión 2</span>
+    <h3>El aspecto es global; el comportamiento, del componente</h3>
+    <p>Botones, campos, tablas y chips se definen una vez. Una pantalla nueva nace con el aspecto correcto y se escribe en decenas de líneas, no en cientos.</p>
+  </div>
+  <div class="tarjeta">
+    <span class="tarjeta__num">Decisión 3</span>
+    <h3>Cargar y enviar se resuelven una vez</h3>
+    <p><code>recurso()</code> da el trío cargando/error/datos con recarga; <code>accion()</code> da enviando/error y protege del doble clic. Ninguna pantalla repite ese andamiaje ni olvida apagar un indicador.</p>
+  </div>
+  <div class="tarjeta">
+    <span class="tarjeta__num">Decisión 4</span>
+    <h3>Todo se carga cuando se usa</h3>
+    <p>Salvo el marco, cada ruta usa <code>loadComponent</code>. Un candidato nunca descarga el editor de rúbricas, y añadir una pantalla no engorda el arranque de las demás.</p>
+  </div>
+</div>
+
+<h2 id="rutas">Rutas y guardias</h2>
+<p>
+  El mapa de rutas es también el mapa de permisos. Hay tres guardias y están declaradas en
+  <code>app.routes.ts</code>, no dentro de los componentes, para que el mapa se lea entero de un
+  vistazo. La guardia de rol <strong>no sustituye</strong> a la autorización del backend: solo evita
+  ofrecer una pantalla que terminaría en 403.
+</p>
+
+<div class="diagrama">
+  <div class="diagrama__cabecera"><span class="punto"></span>Decisión de acceso a una ruta</div>
+  <div class="diagrama__lienzo">
+    <div class="mermaid">
+flowchart TD
+  N["Navegación"] --> Q{"¿Ruta pública?<br/>portada · acceso · registro"}
+  Q -->|"sí"| G1{"guardiaInvitado<br/>¿ya tiene sesión?"}
+  G1 -->|"no"| PUB["Renderiza la pantalla pública"]
+  G1 -->|"sí"| HOME["Redirige al inicio de su rol"]
+
+  Q -->|"no"| G2{"guardiaSesion<br/>¿sesión restaurada?"}
+  G2 -->|"no"| ACC["/acceso?destino=…"]
+  G2 -->|"sí"| G3{"guardiaRol<br/>¿rol permitido?"}
+  G3 -->|"sí"| C["Carga diferida del componente"]
+  G3 -->|"no"| HOME
+    </div>
+  </div>
+  <div class="diagrama__pie">El destino se conserva en la URL para devolver a la persona donde iba después de entrar. El backend vuelve a decidir sobre cada operación.</div>
+</div>
+
+<div class="tabla-envoltura">
+  <table>
+    <thead><tr><th>Área</th><th>Rutas principales</th><th>Rol</th></tr></thead>
+    <tbody>
+      <tr><td>Público</td><td><code>/</code>, <code>/acceso</code>, <code>/registro</code>, <code>/registro-empresa</code></td><td>Sin sesión</td></tr>
+      <tr><td>Reclutador</td><td><code>/panel</code>, <code>/vacantes</code>, <code>/vacantes/:id/reporte</code>, <code>/talento</code>, <code>/ejercicios</code></td><td>reclutador · administrador</td></tr>
+      <tr><td>Candidato</td><td><code>/explorar</code>, <code>/mis-pruebas</code>, <code>/mis-resultados</code>, <code>/mentor</code>, <code>/mi-cuenta</code></td><td>candidato</td></tr>
+      <tr><td>Moderación</td><td><code>/moderacion</code>, <code>/moderacion/:id</code>, <code>/moderacion/metricas</code></td><td>moderador · administrador</td></tr>
+      <tr><td>Administración</td><td><code>/administracion</code></td><td>administrador</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 id="sesion">Sesión: la misma app, dos formas de autenticar</h2>
+<p>
+  En web el token viaja en una cookie <code>HttpOnly</code>: JavaScript no puede leerlo, y el
+  interceptor solo añade <code>withCredentials</code>. En la APK no hay cookies: el token se guarda
+  en el <em>KeyStore</em> del sistema y se adjunta como <code>Authorization: Bearer</code> únicamente
+  a las peticiones de nuestra API, nunca a las URLs firmadas del almacenamiento.
+</p>
+
+<div class="tabla-envoltura">
+  <table>
+    <thead><tr><th>Aspecto</th><th>Web</th><th>APK</th></tr></thead>
+    <tbody>
+      <tr><td>API</td><td><code>/api/v1</code> bajo el mismo origen (proxy)</td><td>URL absoluta configurada al compilar</td></tr>
+      <tr><td>Sesión</td><td>Cookie HttpOnly + <code>withCredentials</code></td><td>Bearer + KeyStore seguro</td></tr>
+      <tr><td>Inicio y registro</td><td><code>cliente</code> omitido</td><td><code>cliente: 'apk'</code>; el backend devuelve los tokens en el cuerpo</td></tr>
+      <tr><td>Descargas y enlaces</td><td>Ancla <code>download</code> / <code>window.open</code></td><td>Navegador del sistema y hoja de compartir</td></tr>
+      <tr><td>Navegación</td><td>Barra superior</td><td>Barra inferior en ≤ 860 px y botón «atrás» de Android</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>
+  El interceptor de renovación actúa una sola vez ante un 401, reintenta la petición con el token
+  nuevo y, si la renovación también falla, olvida la sesión y lleva a <code>/acceso</code> con un
+  aviso. No deja la pantalla rota en silencio.
+</p>
+
+<h3>El orden de los interceptores importa</h3>
+<ol class="pasos">
+  <li><h3>Credenciales</h3><p>Añade la cookie o el Bearer según la plataforma. Va primero para que todo lo demás vea una petición autenticada.</p></li>
+  <li><h3>Renovación</h3><p>Detecta el 401, renueva y reintenta. Se excluye a sí misma en las rutas de autenticación para no entrar en un bucle.</p></li>
+  <li><h3>Avisos globales</h3><p>Convierte el 429 y los 5xx en un mensaje visible. Solo los dos fallos que una pantalla no puede resolver por su cuenta.</p></li>
+</ol>
+
+<h2 id="diseno">Diseño y sistema visual</h2>
+<p>
+  La identidad es oscura por omisión —fondo <code>#08080a</code>, superficie <code>#0d0d11</code> y
+  acento verde <code>#5FD49B</code>—, con un tema claro que solo redefine color. La tipografía es
+  Archivo para titulares, IBM Plex Sans para texto e IBM Plex Mono para etiquetas y cifras. La escala
+  es fluida: un solo juego de tamaños sirve de móvil a escritorio.
+</p>
+<ul>
+  <li><strong>Retícula y superficies.</strong> Fondo con malla fina, superficies elevadas por capas y bordes de baja opacidad; el acento se usa para estado y foco, no como decoración.</li>
+  <li><strong>PrimeNG con preset propio.</strong> El tema se registra en una capa CSS para que los estilos del producto ganen siempre; el modo oscuro lo decide <code>&lt;html data-tema&gt;</code>, no el sistema operativo.</li>
+  <li><strong>Componentes de dominio.</strong> El desglose por criterio usa <code>role="meter"</code> con mínimo, máximo y valor; los avisos usan una región <code>aria-live</code>.</li>
+  <li><strong>Transiciones de vista.</strong> Angular View Transitions con la transición inicial desactivada, y restauración de scroll al volver atrás.</li>
+</ul>
+
+<h2 id="accesibilidad">Accesibilidad</h2>
+<p>
+  El objetivo declarado es <strong>WCAG 2.1 AA</strong>. No es una capa añadida al final: las
+  decisiones están en los componentes compartidos.
+</p>
+<div class="rejilla rejilla--2">
+  <div class="tarjeta">
+    <h3>Teclado y foco</h3>
+    <p>Enlace «saltar al contenido», foco visible con anillo de contraste, diálogos que gestionan foco, <code>role="alertdialog"</code> y cierre con Escape.</p>
+  </div>
+  <div class="tarjeta">
+    <h3>Contraste y color</h3>
+    <p>El texto tenue se corrigió a 5,4:1 sobre el fondo y 5,0:1 sobre superficies para que las etiquetas micro también pasen AA. El color nunca es el único portador de significado.</p>
+  </div>
+  <div class="tarjeta">
+    <h3>Movimiento</h3>
+    <p>El orbe decorativo y las transiciones respetan <code>prefers-reduced-motion</code>. El orbe es <code>aria-hidden</code>: no aporta información.</p>
+  </div>
+  <div class="tarjeta">
+    <h3>Etiquetas y datos</h3>
+    <p>Los campos asocian etiqueta y error con <code>aria-invalid</code>; las cifras y medidores llevan nombre accesible. La navegación móvil conserva el botón «atrás» del sistema.</p>
+  </div>
+</div>
+
+<h2 id="rendimiento">Rendimiento del cliente</h2>
+<p>
+  Sin <code>zone.js</code>, Angular solo repinta cuando una signal cambia. Las rutas se cargan bajo
+  demanda y los presupuestos de build fallan si el paquete inicial supera 1 MB o un estilo de
+  componente supera 16 kB. La app no guarda el token en <code>localStorage</code> en web: no hay nada
+  que un XSS pueda leer para robar la sesión.
+</p>
+
+<div class="aviso aviso--aviso">
+  <p class="aviso__titulo">El punto débil: pruebas</p>
+  <p>
+    El frontend es la capa con menos cobertura del proyecto: <strong>tres archivos de especificación
+    y trece casos</strong>, centrados en la sesión y las guardias. No hay pruebas de componentes ni un
+    E2E del flujo completo. Es una deuda declarada, no un olvido: el backend concentra la lógica y
+    las pruebas, pero una regresión visual o de navegación puede pasar sin que la CI la detecte.
+  </p>
+</div>
+
+<h2 id="movil">La APK no es un segundo producto</h2>
+<p>
+  Capacitor envuelve la misma aplicación. Lo específico de Android está aislado en
+  <code>src/app/nucleo/plataforma/</code> y en el entorno móvil: almacenamiento seguro, archivos,
+  compartir, teclado y el botón de volver. La compilación requiere JDK 21 y Android SDK 36; el
+  resultado es un APK firmado con la URL de la API fijada en el build.
+</p>
+<div class="aviso aviso--ok">
+  <p class="aviso__titulo">Una sola cosa que mantener</p>
+  <p>
+    No hay dos interfaces que se desincronicen: un cambio de diseño o de flujo llega a web y a Android
+    a la vez. El coste es que cualquier dependencia web tiene que funcionar dentro de la WebView, y
+    por eso las funciones nativas se encapsulan en lugar de esparcirse por las pantallas.
+  </p>
+</div>
+      </div>
+      <nav class="paginacion" aria-label="Navegación entre páginas">
+        <a href="arquitectura.html"><span>← Anterior</span><strong>Arquitectura</strong></a>
+        <a class="paginacion__siguiente" href="backend.html"><span>Siguiente →</span><strong>Backend</strong></a>
+      </nav>
+    </main>
+    <aside id="sitio-toc" aria-label="Contenido de la página"></aside>
+  </div>
+  <div id="sitio-pie"></div>
+  <noscript>
+    <div style="max-width:900px;margin:0 auto;padding:24px">
+      <p><strong>La navegación lateral necesita JavaScript.</strong> Estas son las secciones:</p>
+      <ul>
+        <li><a href="index.html">MeritIA · Documentación</a></li>
+        <li><a href="arquitectura.html">Arquitectura</a></li>
+        <li><a href="frontend.html">Frontend</a></li>
+        <li><a href="backend.html">Backend</a></li>
+        <li><a href="ia.html">Servicio de IA</a></li>
+        <li><a href="rag.html">Mentor RAG</a></li>
+        <li><a href="leyes.html">Leyes y privacidad</a></li>
+        <li><a href="requisitos.html">Requisitos</a></li>
+        <li><a href="operacion.html">Operación</a></li>
+        <li><a href="decisiones.html">Decisiones de arquitectura</a></li>
+        <li><a href="estado.html">Estado del proyecto</a></li>
+      </ul>
+    </div>
+  </noscript>
+  <script src="assets/js/mermaid.min.js" defer></script>
+  <script src="assets/js/site.js" defer></script>
+</body>
+</html>

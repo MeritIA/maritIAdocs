@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="es" data-page="backend">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Backend · MeritIA</title>
+  <meta name="description" content="NestJS 12, ocho módulos, PASETO, PostgreSQL, colas BullMQ, seguridad, rendimiento medido y límites conocidos.">
+  <meta name="author" content="MeritIA">
+  <meta name="theme-color" content="#08080a" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f7f7f8" media="(prefers-color-scheme: light)">
+  <meta name="color-scheme" content="dark light">
+  <link rel="canonical" href="https://meritia.github.io/maritIAdocs/backend.html">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/img/logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/site.css">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MeritIA · Documentación">
+  <meta property="og:locale" content="es_CO">
+  <meta property="og:title" content="Backend · MeritIA">
+  <meta property="og:description" content="NestJS 12, ocho módulos, PASETO, PostgreSQL, colas BullMQ, seguridad, rendimiento medido y límites conocidos.">
+  <meta property="og:url" content="https://meritia.github.io/maritIAdocs/backend.html">
+  <meta property="og:image" content="https://meritia.github.io/maritIAdocs/assets/img/og.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Backend · MeritIA">
+  <meta name="twitter:description" content="NestJS 12, ocho módulos, PASETO, PostgreSQL, colas BullMQ, seguridad, rendimiento medido y límites conocidos.">
+  <meta name="twitter:image" content="https://meritia.github.io/maritIAdocs/assets/img/og.svg">
+  <script>
+    try { var t = localStorage.getItem('meritia-docs-tema'); if (t === 'claro') document.documentElement.dataset.tema = 'claro'; } catch (e) {}
+  </script>
+</head>
+<body>
+  <a class="salto" href="#contenido">Saltar al contenido</a>
+  <div id="sitio-barra"></div>
+  <div class="envoltura">
+    <aside id="sitio-lateral"></aside>
+    <main id="contenido" class="principal">
+      <div class="prosa">
+<header class="cabecera-pagina">
+  <span class="ceja">Backend</span>
+  <h1>Ocho módulos, un contrato y un servidor que prefiere rechazar antes que ahogarse.</h1>
+  <p class="entradilla">
+    NestJS 12 sobre Node 24, PostgreSQL 17 y Redis. El backend es el único que toca los datos, el
+    que extrae el texto de las entregas y el que decide quién puede ver qué. Su contrato OpenAPI se
+    genera desde el código y la CI falla si el documento publicado no coincide.
+  </p>
+  <div class="metas">
+    <span class="meta">NestJS 12</span>
+    <span class="meta">Node 24.16</span>
+    <span class="meta meta--acento">83 operaciones</span>
+    <span class="meta">23 migraciones</span>
+    <span class="meta">89,6 % cobertura</span>
+  </div>
+</header>
+
+<h2 id="pila">La pila</h2>
+<div class="tabla-envoltura">
+  <table>
+    <thead><tr><th>Pieza</th><th>Versión / elección</th><th>Por qué</th></tr></thead>
+    <tbody>
+      <tr><td>Runtime</td><td>Node 24.16, fijado en <code>.nvmrc</code></td><td>Una versión LTS concreta, no la última: se actualiza en los tres meses siguientes a la salida de la siguiente LTS.</td></tr>
+      <tr><td>Framework</td><td>NestJS 12</td><td>Módulos, inyección de dependencias y un orden de ejecución claro para poner la seguridad en el sitio correcto.</td></tr>
+      <tr><td>Base de datos</td><td>PostgreSQL 17 con TypeORM 1.1</td><td>Transacciones, constraints y un esquema por módulo. Única base, no una por servicio.</td></tr>
+      <tr><td>Cola</td><td>Redis 8.2 + BullMQ 6.3.5</td><td>Reintentos con espera exponencial e idempotencia por identificador de entrega.</td></tr>
+      <tr><td>Objetos</td><td>S3 compatible; SeaweedFS 4.48 en desarrollo</td><td>Las entregas no inflan la base ni el proceso. URLs firmadas de vida corta.</td></tr>
+      <tr><td>Autenticación</td><td>PASETO v4 público (Ed25519)</td><td>Sin campo de algoritmo que negociar: se elimina la clase de fallos de JWT por confusión de <code>alg</code>.</td></tr>
+      <tr><td>Contrato</td><td>REST + OpenAPI generado</td><td>La matriz de permisos queda en un solo sitio; la CI verifica que el documento corresponda al código.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 id="peticion">El camino de una petición</h2>
+<p>
+  El orden no es un detalle de Nest: es la razón por la que el control de admisión vive en un
+  middleware. Al rechazar antes de las guardias, no se gasta validación, autenticación ni una
+  conexión a la base en una petición que no se va a poder terminar.
+</p>
+
+<div class="diagrama diagrama--ancho">
+  <div class="diagrama__cabecera"><span class="punto"></span>Ciclo de una petición HTTP</div>
+  <div class="diagrama__lienzo">
+    <div class="mermaid">
+flowchart LR
+  P["Petición<br/>HTTPS"] --> M["Middleware<br/>admisión · CORS · Helmet"]
+  M -->|"sin cupo"| R503["503 + Retry-After"]
+  M --> G["Guardias<br/>PASETO · roles · límites"]
+  G -->|"sin sesión"| R401["401"]
+  G -->|"sin permiso"| R404["404, no 403"]
+  G --> I["Interceptores<br/>contexto · duración"]
+  I --> V["Pipes<br/>validación del DTO"]
+  V -->|"inválido"| R400["400 + detalle por campo"]
+  V --> C["Controlador<br/>contrato HTTP"]
+  C --> S["Servicio de aplicación<br/>reglas y transacciones"]
+  S --> REP["Repositorio<br/>TypeORM"]
+  REP --> DB[("PostgreSQL")]
+  C -.-> F["Filtro de excepciones<br/>forma única de error"]
+    </div>
+  </div>
+  <div class="diagrama__pie">La autenticación se verifica sin tocar la base: PASETO es un token firmado. La autorización por recurso sí consulta, porque depende del dueño.</div>
+</div>
+
+<h3>La forma única del error</h3>
+<p>
+  Toda respuesta de error tiene los mismos campos. <code>codigo</code> es estable y legible por
+  máquina; <code>mensaje</code>, para la persona; <code>referencia</code>, para cruzar una queja con
+  el log sin enseñar nada del interior. Nunca sale una traza, un nombre de tabla ni una versión de
+  dependencia.
+</p>
+<pre data-lenguaje="json"><code>{
+  "estado": 503,
+  "codigo": "SERVICIO_SATURADO",
+  "mensaje": "El servicio está recibiendo más peticiones de las que puede atender.",
+  "momento": "2026-11-24T20:00:00.000Z",
+  "ruta": "/api/v1/vacantes",
+  "referencia": "b1f0c4d2-…"
+}</code></pre>
+
+<h3>Decisiones de contrato que evitan filtraciones</h3>
+<ul>
+  <li><strong>404 en vez de 403.</strong> A un recurso ajeno se responde «no existe», no «existe pero no puedes». Un 403 confirma la existencia y permite enumerar identificadores (<a href="decisiones.html#adr-0012">ADR-0012</a>).</li>
+  <li><strong>Revelar identidad deja rastro.</strong> El ranking se lee con alias. Ver el nombre y el correo es un <code>POST</code> explícito que escribe quién lo pidió y cuándo; un registro de auditoría que nadie puede consultar no es una auditoría.</li>
+  <li><strong>El titular sale del token.</strong> Las rutas de «mis datos» y «mis consentimientos» no llevan identificador en la URL: nadie puede cambiar los permisos de otra persona, ni siquiera un administrador.</li>
+  <li><strong>Sin campos de más.</strong> Los DTO se validan con lista blanca y rechazan propiedades desconocidas; los archivos se validan por contenido, no por extensión.</li>
+</ul>
+
+<h2 id="seguridad">Seguridad</h2>
+<div class="tabla-envoltura">
+  <table>
+    <thead><tr><th>Capa</th><th>Mecanismo</th><th>Detalle</th></tr></thead>
+    <tbody>
+      <tr><td>Identidad</td><td>PASETO v4 público</td><td>Firma Ed25519. Token de acceso corto y token de renovación; la revocación mueve <code>tokens_validos_desde</code> por usuario.</td></tr>
+      <tr><td>Sesión web</td><td>Cookie <code>HttpOnly</code></td><td><code>SameSite=strict</code> y <code>Secure</code> en producción. JavaScript no puede leer el token.</td></tr>
+      <tr><td>Contraseñas</td><td>argon2id</td><td>Hash con parámetros de memoria y tiempo; nunca se registra ni se devuelve.</td></tr>
+      <tr><td>Datos personales</td><td>AES-256-GCM</td><td>Correo y nombre cifrados. El correo se busca por un hash SHA-256 aparte porque un cifrado con IV aleatorio no se puede indexar.</td></tr>
+      <tr><td>Autorización</td><td>Por endpoint, recurso y operación</td><td>Pruebas de seguridad contra IDOR. El rol no basta: se comprueba la pertenencia.</td></tr>
+      <tr><td>Límites</td><td>Tres capas en Redis</td><td>L1 100 pet/min por IP · L2 200 pet/min por usuario · L3 login 10/min, entregas 5 cada 5 min, evaluaciones 10/min por usuario.</td></tr>
+      <tr><td>Saturación</td><td>Control de admisión</td><td>50 peticiones en vuelo por omisión; al superarlo, 503 con <code>Retry-After</code> en lugar de una cola invisible.</td></tr>
+      <tr><td>Entrada</td><td>Validación y tamaños</td><td>Lista blanca de propiedades, límite de cuerpo, 25 MiB por entrega y tipo verificado por contenido.</td></tr>
+      <tr><td>Secretos</td><td>Gitleaks en cada push</td><td>Falla si hay un secreto en cualquier commit del historial. Acciones de GitHub fijadas por SHA.</td></tr>
+      <tr><td>Dependencias</td><td><code>npm audit</code> y SonarQube</td><td>El pipeline falla ante una vulnerabilidad crítica o si la quality gate no pasa.</td></tr>
+      <tr><td>Registros</td><td>Log estructurado</td><td>Sin contraseñas, tokens ni texto de entregas. La referencia del error es un UUID, no un volcado.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 id="evaluacion">La evaluación es asíncrona</h2>
+<p>
+  Calificar implica llamar a un modelo: segundos en el mejor caso, un minuto cuando el proveedor va
+  lento y un error que no depende de nosotros cuando se cae. Por eso la entrega responde de
+  inmediato y la evaluación entra en una cola (<a href="decisiones.html#adr-0007">ADR-0007</a>).
+</p>
+
+<div class="diagrama diagrama--ancho">
+  <div class="diagrama__cabecera"><span class="punto"></span>De la entrega a la nota</div>
+  <div class="diagrama__lienzo">
+    <div class="mermaid">
+sequenceDiagram
+  autonumber
+  actor C as Candidato
+  participant API as Backend
+  participant DB as PostgreSQL
+  participant S3 as Almacén S3
+  participant Q as Redis / BullMQ
+  participant W as Worker
+  participant IA as ai-service
+  participant G as Gemini
+
+  C->>API: POST /entregas
+  API->>DB: verifica consentimiento de IA y cupo
+  API->>S3: guarda el archivo (URL firmada)
+  API->>DB: registra la entrega
+  API->>Q: encola con id = id de entrega
+  API-->>C: 202 · queda en evaluación
+
+  Q->>W: toma el trabajo
+  W->>S3: descarga el archivo
+  W->>W: extrae texto (zip, md, txt, ipynb…)
+  W->>IA: POST /api/v1/evaluaciones (solo texto)
+  IA->>G: rúbrica + entrega delimitada
+  G-->>IA: JSON por criterio
+  IA->>IA: valida y calcula la nota
+  IA-->>W: nota + evidencia + seguridad
+  W->>DB: persiste la evaluación
+  W->>Q: publica evaluacion-finalizada
+  Note over DB: reportes compone el ranking en vivo
+    </div>
+  </div>
+  <div class="diagrama__pie">El identificador del trabajo es el de la entrega: encolar dos veces no evalúa dos veces. Un fallo del proveedor retrasa notas, no rechaza entregas.</div>
+</div>
+
+<div class="rejilla rejilla--2">
+  <div class="tarjeta">
+    <h3>Reintentos con criterio</h3>
+    <p>El servicio de IA devuelve <code>reintentable</code> en cada error. Un 502 de salida inválida o un 503 de proveedor no disponible se reintentan; una rúbrica inválida o una clave incorrecta, no. Reintentar lo que nunca va a funcionar solo gasta cuota.</p>
+  </div>
+  <div class="tarjeta">
+    <h3>El worker se separa sin tocar código</h3>
+    <p><code>COLA_WORKER_HABILITADO</code> decide si un proceso consume la cola. La etapa 2 del plan de escalado es configuración: la misma imagen, dos despliegues, uno para HTTP y otro para trabajos.</p>
+  </div>
+  <div class="tarjeta">
+    <h3>La extracción vive en el backend</h3>
+    <p>El servicio de IA no recibe archivos. Abrir un comprimido de un desconocido es la operación más peligrosa del sistema; se hace donde se le pueden poner límites de tamaño, número de archivos y rutas (<a href="decisiones.html#adr-0008">ADR-0008</a>).</p>
+  </div>
+  <div class="tarjeta">
+    <h3>Lo que no se puede leer, falla con motivo</h3>
+    <p>Una entrega ilegible queda fallida con su explicación y <strong>no consume un intento</strong> del candidato. Hoy el PDF sin capa de texto y el <code>.docx</code> caen aquí: están admitidos al subir, pero la extracción todavía no los lee.</p>
+  </div>
+</div>
+
+<h2 id="datos">Datos, migraciones y borrado</h2>
+<p>
+  Hay 23 migraciones versionadas y un esquema por módulo. La base protege la integridad que puede
+  proteger sola; lo que cruza módulos lo sostiene el servicio. La política es <strong>no borrar de
+  verdad</strong>: lo auditable se marca inactivo, y el dato ausente se muestra como «Candidato no
+  disponible» en lugar de romper el informe.
+</p>
+<div class="aviso">
+  <p class="aviso__titulo">La excepción: eliminar la cuenta</p>
+  <p>
+    El derecho de supresión es una excepción real. <code>DELETE /autenticacion/cuenta</code> elimina
+    los datos personales y conserva la prueba de que un día se consintió, sin clave foránea en
+    cascada que la destruya. Los consentimientos quedan como historial; la identidad, no.
+  </p>
+</div>
+
+<h2 id="rendimiento">Rendimiento medido</h2>
+<p>
+  Medición con Grafana k6 del 6 de octubre de 2026, contra el backend en modo producción, PostgreSQL
+  17.6, Redis 8.2 y SeaweedFS 4.48. Todo corrió en una sola máquina de ocho núcleos, con el generador
+  de carga compitiendo por los mismos núcleos: <strong>las cifras son un piso, no un techo</strong>.
+  El servicio de IA fue un doble con latencia simulada, no el proveedor real.
+</p>
+
+<div class="tabla-envoltura">
+  <table>
+    <thead><tr><th>it/s</th><th>pet/s</th><th>p50</th><th>p95</th><th>p99</th><th>Descartadas</th><th>Estado</th></tr></thead>
+    <tbody>
+      <tr><td>10</td><td>27</td><td>6 ms</td><td>21 ms</td><td>35 ms</td><td>0 %</td><td><span class="insignia insignia--ok">sano</span></td></tr>
+      <tr><td>20</td><td>53</td><td>7 ms</td><td>25 ms</td><td>71 ms</td><td>0 %</td><td><span class="insignia insignia--ok">sano</span></td></tr>
+      <tr><td>30</td><td>79</td><td>9 ms</td><td>83 ms</td><td>190 ms</td><td>0 %</td><td><span class="insignia insignia--ok">sano</span></td></tr>
+      <tr><td>40</td><td>106</td><td>14 ms</td><td>1.176 ms</td><td>2.011 ms</td><td>0,1 %</td><td><span class="insignia insignia--parcial">degradado</span></td></tr>
+      <tr><td>50</td><td>78</td><td>331 ms</td><td>2.881 ms</td><td>4.187 ms</td><td>4,7 %</td><td><span class="insignia insignia--pendiente">caído</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>
+  El hallazgo que ordena el plan de escalado es que el sistema <strong>cae por congestión, no por
+  errores</strong>: en ningún escenario hubo una respuesta inesperada. Con más carga hace menos
+  trabajo —106, luego 78 y hasta 57 peticiones por segundo—. El cuello es el <em>event loop</em> de
+  Node: 128 % de un núcleo en una máquina de ocho, con 11 conexiones de base de 100.
+</p>
+
+<div class="aviso aviso--aviso">
+  <p class="aviso__titulo">Los límites de la medición</p>
+  <p>
+    El mismo ritmo de 20 it/s dio 25 ms de p95 sobre base nueva y <strong>541 ms sobre base usada</strong>
+    —21 veces— con unas 1.100 entregas y evaluaciones. No se determinó si manda el coste de las filas
+    acumuladas o el worker compitiendo por el <em>event loop</em>. Queda como medición pendiente, no
+    como conclusión. Tampoco hay <em>soak</em> de horas que descarte una fuga de memoria.
+  </p>
+</div>
+
+<h2 id="pruebas">Pruebas y verificación</h2>
+<div class="cifras">
+  <div class="cifra"><span class="cifra__valor">586</span><span class="cifra__etiqueta">pruebas en la<br>verificación de CI</span></div>
+  <div class="cifra"><span class="cifra__valor">89,6<em>%</em></span><span class="cifra__etiqueta">cobertura<br>de líneas</span></div>
+  <div class="cifra"><span class="cifra__valor">77<em>%</em></span><span class="cifra__etiqueta">cobertura<br>de ramas</span></div>
+  <div class="cifra"><span class="cifra__valor">5</span><span class="cifra__etiqueta">niveles previstos:<br>unit · integración · E2E · seguridad · concurrencia</span></div>
+</div>
+<p>
+  Las pruebas de integración corren contra PostgreSQL, Redis y el almacenamiento levantados con el
+  mismo <code>compose.yaml</code> del entorno local y las mismas versiones de imagen. No hay dobles
+  que pasen sin comprobar nada: las pruebas de almacenamiento validan firmas contra el almacén real.
+</p>
+<div class="aviso aviso--peligro">
+  <p class="aviso__titulo">Falta el E2E del flujo completo</p>
+  <p>
+    Hay unitarias, integración, seguridad y concurrencia, pero no un E2E que recorra registro →
+    consentimiento → postulación → entrega → evaluación → ranking. Es el hueco declarado del RNF-CAL-3
+    y la razón por la que una regresión entre módulos puede pasar la CI.
+  </p>
+</div>
+
+<h2 id="limites">Límites conocidos</h2>
+<ul>
+  <li><strong>Pagos simulados.</strong> No hay pasarela: el saldo, los abonos y los retiros existen como pantalla y como decisión de alcance, no como dinero real.</li>
+  <li><strong>PDF y DOCX sin extracción.</strong> Se admiten al subir, pero la evaluación falla con motivo en vez de calificarse.</li>
+  <li><strong>Sin entorno desplegado.</strong> El pipeline publica imagen; el despliegue está desactivado hasta elegir proveedor.</li>
+  <li><strong>Rotación de la clave de cifrado sin resolver.</strong> Es un requisito de operación, no de funcionalidad.</li>
+  <li><strong>Métricas por grupo demográfico inexistentes.</strong> La plataforma no recoge esos datos, así que no puede medir impacto diferencial. Se declara en lugar de inventarlo.</li>
+</ul>
+      </div>
+      <nav class="paginacion" aria-label="Navegación entre páginas">
+        <a href="frontend.html"><span>← Anterior</span><strong>Frontend</strong></a>
+        <a class="paginacion__siguiente" href="ia.html"><span>Siguiente →</span><strong>Servicio de IA</strong></a>
+      </nav>
+    </main>
+    <aside id="sitio-toc" aria-label="Contenido de la página"></aside>
+  </div>
+  <div id="sitio-pie"></div>
+  <noscript>
+    <div style="max-width:900px;margin:0 auto;padding:24px">
+      <p><strong>La navegación lateral necesita JavaScript.</strong> Estas son las secciones:</p>
+      <ul>
+        <li><a href="index.html">MeritIA · Documentación</a></li>
+        <li><a href="arquitectura.html">Arquitectura</a></li>
+        <li><a href="frontend.html">Frontend</a></li>
+        <li><a href="backend.html">Backend</a></li>
+        <li><a href="ia.html">Servicio de IA</a></li>
+        <li><a href="rag.html">Mentor RAG</a></li>
+        <li><a href="leyes.html">Leyes y privacidad</a></li>
+        <li><a href="requisitos.html">Requisitos</a></li>
+        <li><a href="operacion.html">Operación</a></li>
+        <li><a href="decisiones.html">Decisiones de arquitectura</a></li>
+        <li><a href="estado.html">Estado del proyecto</a></li>
+      </ul>
+    </div>
+  </noscript>
+  <script src="assets/js/mermaid.min.js" defer></script>
+  <script src="assets/js/site.js" defer></script>
+</body>
+</html>

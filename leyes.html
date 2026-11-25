@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="es" data-page="leyes">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Leyes y privacidad · MeritIA</title>
+  <meta name="description" content="Normativa colombiana aplicable: Ley 1581 de 2012, consentimiento granular, datos sensibles, transferencias y derechos del titular.">
+  <meta name="author" content="MeritIA">
+  <meta name="theme-color" content="#08080a" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f7f7f8" media="(prefers-color-scheme: light)">
+  <meta name="color-scheme" content="dark light">
+  <link rel="canonical" href="https://meritia.github.io/maritIAdocs/leyes.html">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/img/logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/site.css">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MeritIA · Documentación">
+  <meta property="og:locale" content="es_CO">
+  <meta property="og:title" content="Leyes y privacidad · MeritIA">
+  <meta property="og:description" content="Normativa colombiana aplicable: Ley 1581 de 2012, consentimiento granular, datos sensibles, transferencias y derechos del titular.">
+  <meta property="og:url" content="https://meritia.github.io/maritIAdocs/leyes.html">
+  <meta property="og:image" content="https://meritia.github.io/maritIAdocs/assets/img/og.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Leyes y privacidad · MeritIA">
+  <meta name="twitter:description" content="Normativa colombiana aplicable: Ley 1581 de 2012, consentimiento granular, datos sensibles, transferencias y derechos del titular.">
+  <meta name="twitter:image" content="https://meritia.github.io/maritIAdocs/assets/img/og.svg">
+  <script>
+    try { var t = localStorage.getItem('meritia-docs-tema'); if (t === 'claro') document.documentElement.dataset.tema = 'claro'; } catch (e) {}
+  </script>
+</head>
+<body>
+  <a class="salto" href="#contenido">Saltar al contenido</a>
+  <div id="sitio-barra"></div>
+  <div class="envoltura">
+    <aside id="sitio-lateral"></aside>
+    <main id="contenido" class="principal">
+      <div class="prosa">
+<header class="cabecera-pagina">
+  <span class="ceja">Leyes y privacidad</span>
+  <h1>Cumplir con evidencia, y con lo pendiente a la vista.</h1>
+  <p class="entradilla">
+    La Ley 1581 de 2012 no es un anexo del proyecto: es una restricción del modelo de datos. Esta
+    página conecta cada obligación con el mecanismo que la atiende, marca lo que está completo y
+    enumera lo que todavía no. También explica qué normas aplican, cuáles no y por qué.
+  </p>
+  <div class="metas">
+    <span class="meta">Ley 1581 de 2012</span>
+    <span class="meta">Decreto 1377 de 2013</span>
+    <span class="meta meta--acento">Consentimiento granular</span>
+    <span class="meta">Corte: noviembre de 2026</span>
+  </div>
+</header>
+
+<div class="aviso aviso--aviso">
+  <p class="aviso__titulo">Esto no es asesoría legal</p>
+  <p>
+    Es documentación de ingeniería: describe qué hace el código y qué decisiones tomó el equipo.
+    La calificación jurídica definitiva, el registro de bases de datos y la redacción de la política
+    de tratamiento corresponden a quien ejerza la representación legal del responsable.
+  </p>
+</div>
+
+<h2 id="marco">El marco que aplica</h2>
+<div class="tabla-envoltura">
+  <table>
+    <thead><tr><th>Norma</th><th>Qué regula</th><th>Cómo entra en MeritIA</th></tr></thead>
+    <tbody>
+      <tr><td>Constitución Política, arts. 13, 15, 16 y 20</td><td>Igualdad, intimidad, <em>habeas data</em>, libre desarrollo y libertad de expresión.</td><td>Base de los derechos sobre los datos y del deber de no discriminar. El ranking usa alias y la identidad solo se revela con rastro.</td></tr>
+      <tr><td><strong>Ley 1581 de 2012</strong></td><td>Régimen general de protección de datos personales: principios, derechos del titular, deberes del responsable y del encargado.</td><td>Norma central. Define el consentimiento por finalidad, los datos sensibles, la seguridad y los derechos que el producto implementa.</td></tr>
+      <tr><td>Decreto 1377 de 2013, compilado en el Decreto 1074 de 2015</td><td>Reglamenta la Ley 1581: autorización, aviso de privacidad, política de tratamiento, transferencias y encargados.</td><td>Exige poder demostrar la autorización y publicar una política. El historial de consentimientos atiende lo primero; la política está pendiente.</td></tr>
+      <tr><td>Decreto 886 de 2014</td><td>Registro Nacional de Bases de Datos (RNBD) ante la SIC.</td><td>Aplica si el responsable supera el umbral de activos que fija la ley. No se ha evaluado formalmente: está en pendientes.</td></tr>
+      <tr><td>Ley 1273 de 2009</td><td>Delitos informáticos: acceso abusivo, daño, interceptación y uso de datos.</td><td>Justifica el endurecimiento: cifrado, PASETO, límites, bucket privado y pruebas de seguridad.</td></tr>
+      <tr><td>Ley 527 de 1999</td><td>Mensajes de datos, firma electrónica y valor probatorio.</td><td>Sostiene que el registro de consentimientos y la auditoría de revelaciones sean prueba válida de un acto ocurrido en el sistema.</td></tr>
+      <tr><td>Ley 1480 de 2011</td><td>Estatuto del Consumidor: información veraz, publicidad y relaciones de consumo.</td><td>Aplica a la relación con empresas y candidatos. Los pagos están fuera de alcance, así que las obligaciones de pasarela no se activan todavía.</td></tr>
+      <tr><td>Ley 23 de 1982, Ley 1915 de 2018 y Decisión Andina 351 de 1993</td><td>Derechos de autor sobre software, obras literarias y bases de datos.</td><td>El código, las rúbricas y el corpus tienen titularidad. Las dependencias y tipografías tienen licencias que hay que respetar.</td></tr>
+      <tr><td>Ley 1482 de 2011, modificada por la Ley 1752 de 2015</td><td>Prohibición de actos de discriminación, con sanción penal en los casos agravados.</td><td>Un algoritmo que ordena personas es un riesgo directo. De ahí el alias, la revisión humana y la negativa a filtrar el catálogo por afinidad.</td></tr>
+      <tr><td>Ley 1618 de 2013 y NTC 5854</td><td>Inclusión de personas con discapacidad; accesibilidad web (NTC basada en WCAG 2.0).</td><td>El objetivo declarado es WCAG 2.1 AA. No es exigible a esta plataforma privada como si fuera una entidad pública, pero se adopta como estándar de diseño.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3>Lo que no aplica, y por qué</h3>
+<ul>
+  <li><strong>Ley 1266 de 2008 (habeas data financiero).</strong> MeritIA no elabora reportes de crédito ni consulta centrales de riesgo. Un saldo simulado no es una obligación financiera.</li>
+  <li><strong>Ley 1712 de 2014 (transparencia).</strong> Obliga a entidades públicas. MeritIA es un producto privado; el principio de transparencia se adopta por diseño, no por sujeción a esa ley.</li>
+  <li><strong>RGPD europeo y AI Act.</strong> No hay oferta dirigida al mercado europeo ni tratamiento de personas en la UE. Si eso cambiara, el análisis tendría que rehacerse desde cero.</li>
+  <li><strong>Ley 2108 de 2021 u otras de empleo público.</strong> La plataforma no es una entidad pública ni una bolsa de empleo estatal.</li>
+</ul>
+
+<h2 id="principios">Cómo se traduce la Ley 1581</h2>
+<div class="tabla-envoltura">
+  <table>
+    <thead><tr><th>Principio u obligación</th><th>Mecanismo en el sistema</th><th>Estado</th></tr></thead>
+    <tbody>
+      <tr><td>Autorización previa, expresa e informada</td><td>Tres finalidades separadas en el registro, cada una con texto propio y versión del aviso. La decisión se guarda con fecha y pantalla de origen.</td><td><span class="insignia insignia--ok">implementado</span></td></tr>
+      <tr><td>Finalidad determinada</td><td>Catálogo cerrado de permisos; cada uno declara su efecto. No se pueden enviar finalidades que el catálogo no ofrezca.</td><td><span class="insignia insignia--ok">implementado</span></td></tr>
+      <tr><td>Libertad</td><td>El permiso de perfil público nace apagado. Revocar biometría no excluye de la vacante: existe la verificación alterna.</td><td><span class="insignia insignia--ok">implementado</span></td></tr>
+      <tr><td>Datos sensibles</td><td>La foto de verificación es biométrica: consentimiento explícito, bucket privado, enlaces de 5 minutos y borrado a los 90 días.</td><td><span class="insignia insignia--ok">implementado</span></td></tr>
+      <tr><td>Seguridad</td><td>AES-256-GCM para datos personales, argon2id para contraseñas, PASETO, límites en tres capas y registro de revelaciones.</td><td><span class="insignia insignia--ok">implementado</span></td></tr>
+      <tr><td>Transparencia</td><td>La pantalla de permisos muestra título, descripción, efecto y versión del aviso. Falta publicar el aviso y la política completos.</td><td><span class="insignia insignia--parcial">parcial</span></td></tr>
+      <tr><td>Acceso</td><td><code>GET /reportes/mis-datos</code> devuelve perfil, consentimientos, entregas, evaluaciones y postulaciones de quien pregunta.</td><td><span class="insignia insignia--ok">implementado</span></td></tr>
+      <tr><td>Rectificación y actualización</td><td>No hay edición de perfil: el nombre y el correo se fijan en el registro. Corregirlos exige soporte.</td><td><span class="insignia insignia--pendiente">pendiente</span></td></tr>
+      <tr><td>Supresión</td><td><code>DELETE /autenticacion/cuenta</code> con confirmación de contraseña: anonimiza, borra fotos y postulaciones, y conserva la prueba del consentimiento.</td><td><span class="insignia insignia--ok">implementado</span></td></tr>
+      <tr><td>Revocatoria</td><td><code>PUT /autenticacion/consentimientos</code>. Revocar IA impide nuevas entregas; revocar biometría obliga a la modalidad alterna; revocar perfil saca del banco de talento.</td><td><span class="insignia insignia--ok">implementado</span></td></tr>
+      <tr><td>Circulación restringida</td><td>El ranking se lee con alias. Ver identidad es un <code>POST</code> explícito que deja rastro de quién y cuándo.</td><td><span class="insignia insignia--ok">implementado</span></td></tr>
+      <tr><td>Transferencia internacional</td><td>El texto de la entrega viaja a Gemini. No hay contrato de transmisión ni aviso específico documentado.</td><td><span class="insignia insignia--pendiente">pendiente</span></td></tr>
+      <tr><td>Consulta y reclamo</td><td>No hay canal formal publicado ni flujo de PQRS con plazos de 10 y 15 días hábiles.</td><td><span class="insignia insignia--pendiente">pendiente</span></td></tr>
+      <tr><td>Política de tratamiento y aviso</td><td>Existe la versión del aviso que se acepta, pero no una política publicada con responsable, canales y vigencia.</td><td><span class="insignia insignia--pendiente">pendiente</span></td></tr>
+      <tr><td>Registro Nacional de Bases de Datos</td><td>No se ha determinado si el responsable supera el umbral de activos ni se ha radicado el registro.</td><td><span class="insignia insignia--pendiente">pendiente</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 id="consentimiento">El consentimiento, en concreto</h2>
+<p>
+  La Ley 1581 no pide un booleano: pide poder <strong>demostrar</strong> que el consentimiento se
+  obtuvo, para qué finalidad y cuándo. Por eso la tabla es un historial que solo crece
+  (<a href="decisiones.html#adr-0014">ADR-0014</a>). Revocar inserta una fila con
+  <code>concedido = false</code>; el estado actual es la fila más reciente de cada par
+  (usuario, finalidad). No hay <code>UPDATE</code> ni restricción de unicidad.
+</p>
+
+<div class="rejilla rejilla--3">
+  <div class="tarjeta">
+    <span class="tarjeta__num">Finalidad 1</span>
+    <h3>Grabación y verificación biométrica</h3>
+    <p><strong>Por omisión:</strong> concedida. <strong>Efecto de revocar:</strong> la entrega pasa a verificación manual de la empresa, sin cámara. Revocar no excluye de ninguna vacante.</p>
+    <span class="tarjeta__pie"><span class="insignia insignia--ok">se hace cumplir</span></span>
+  </div>
+  <div class="tarjeta">
+    <span class="tarjeta__num">Finalidad 2</span>
+    <h3>Calificación por IA generativa</h3>
+    <p><strong>Por omisión:</strong> concedida. <strong>Efecto de revocar:</strong> no se pueden enviar entregas nuevas; las ya evaluadas no se deshacen. La entrega exige el permiso y responde 403 sin él.</p>
+    <span class="tarjeta__pie"><span class="insignia insignia--ok">se hace cumplir</span></span>
+  </div>
+  <div class="tarjeta">
+    <span class="tarjeta__num">Finalidad 3</span>
+    <h3>Publicación del perfil</h3>
+    <p><strong>Por omisión:</strong> apagada. <strong>Efecto de revocar:</strong> el perfil deja de aparecer en el banco de talento. Solo lista a quien autorizó.</p>
+    <span class="tarjeta__pie"><span class="insignia insignia--ok">se hace cumplir</span></span>
+  </div>
+</div>
+
+<div class="aviso aviso--ok">
+  <p class="aviso__titulo">Una finalidad que se retiró del catálogo</p>
+  <p>
+    «Datos para el Mentor IA» aparecía en una pantalla, pero no en el Taller 2, ni en la EDT, ni en
+    el Plan de Seguridad. Nadie lo había autorizado en el registro. Se retiró del catálogo: pedir un
+    permiso que nadie necesita entrena a decir que sí sin leer. Si el mentor llegara a tratar datos
+    personales, tendría que pedirse una finalidad nueva, con su propio texto y su propia revocación.
+  </p>
+</div>
+
+<h3>Qué se guarda de cada decisión</h3>
+<dl class="definiciones">
+  <div><dt>Quién</dt><dd>El identificador del usuario. No hay identificador en la URL: sale del token.</dd></div>
+  <div><dt>Qué</dt><dd>La finalidad y si se concede o se revoca.</dd></div>
+  <div><dt>Cuándo</dt><dd>Marca de tiempo de la decisión, no de la última modificación.</dd></div>
+  <div><dt>Qué leyó</dt><dd>Versión del aviso y pantalla desde la que se decidió (registro o panel de privacidad).</dd></div>
+  <div><dt>Qué no se guarda</dt><dd>Ni IP ni navegador. Una IP es otro dato personal; recogerla «por si acaso» dentro del registro que existe para no recoger de más sería contradecirse.</dd></div>
+</dl>
+
+<h2 id="ciclo">El ciclo de vida del dato</h2>
+<div class="diagrama diagrama--ancho">
+  <div class="diagrama__cabecera"><span class="punto"></span>Del registro a la supresión</div>
+  <div class="diagrama__lienzo">
+    <div class="mermaid">
+flowchart LR
+  R["Registro"] --> C["Consentimiento<br/>tres finalidades<br/>historial append-only"]
+  C --> P["Postulación"]
+  P --> V["Verificación<br/>cámara o alterna"]
+  V --> E["Entrega"]
+  E --> IA["Evaluación con IA<br/>solo con permiso"]
+  IA --> M["Moderación humana<br/>riesgo alto o muestreo"]
+  M --> RK["Ranking con alias"]
+  RK --> T["Banco de talento<br/>solo con permiso"]
+  V -.-> F["Foto biométrica<br/>90 días"]
+  F -.-> X["Purga automática"]
+  E -.-> D["Derechos del titular<br/>acceso · supresión · revocación"]
+  D -.-> X
+    </div>
+  </div>
+  <div class="diagrama__pie">La foto se borra a los 90 días por un temporizador y también al eliminar la cuenta. El historial de consentimientos sobrevive a la cuenta para conservar la prueba.</div>
+</div>
+
+<h2 id="derechos">Los derechos del titular y dónde se ejercen</h2>
+<div class="tabla-envoltura">
+  <table>
+    <thead><tr><th>Derecho</th><th>Cómo se ejerce hoy</th><th>Qué falta</th></tr></thead>
+    <tbody>
+      <tr><td>Conocer y acceder</td><td><code>GET /reportes/mis-datos</code> devuelve todo lo guardado, en JSON, sin intervención de un tercero.</td><td>Una vista legible y descargable para quien no lee JSON.</td></tr>
+      <tr><td>Actualizar y rectificar</td><td>No hay edición de perfil.</td><td>Un canal y un endpoint para corregir nombre y correo, con verificación de identidad.</td></tr>
+      <tr><td>Suprimir</td><td><code>DELETE /autenticacion/cuenta</code> con contraseña. Anonimiza, borra fotos y postulaciones.</td><td>Confirmar qué se conserva por obligación legal y comunicarlo en la respuesta.</td></tr>
+      <tr><td>Revocar la autorización</td><td><code>PUT /autenticacion/consentimientos</code>, por finalidad e independiente.</td><td>Nada funcional; el efecto de cada permiso ya está aplicado.</td></tr>
+      <tr><td>Presentar consultas y reclamos</td><td>No hay canal publicado ni plazo formal.</td><td>Correo o formulario, responsable designado y plazos de 10 y 15 días hábiles.</td></tr>
+      <tr><td>No ser objeto de decisiones injustificadas</td><td>La calificación por IA se explica por criterio y la descalificación pasa por moderación humana.</td><td>Documentar el procedimiento y el derecho a disputar la decisión más allá del caso de moderación.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="aviso">
+  <p class="aviso__titulo">Una precisión importante</p>
+  <p>
+    La Ley 1581 no consagra un derecho general a la explicación algorítmica como el RGPD europeo. Que
+    MeritIA entregue evidencia por criterio y revise antes de descalificar es una decisión de diseño,
+    no una obligación literal de esa norma. Se hace porque el producto vende decisiones defendibles,
+    y porque la ausencia de explicación haría imposible ejercer los derechos de rectificación y reclamo.
+  </p>
+</div>
+
+<h2 id="transferencia">Transferencia internacional</h2>
+<p>
+  La evaluación envía el texto de la entrega a Gemini, un proveedor de Google. Ese tratamiento ocurre
+  fuera de Colombia y es una transferencia internacional de datos personales, aunque el texto no
+  contenga el nombre del candidato: una entrega puede incluirlo, y el conjunto sigue siendo dato
+  personal.
+</p>
+<div class="aviso aviso--peligro">
+  <p class="aviso__titulo">Pendiente de formalizar</p>
+  <p>
+    No hay hoy un contrato de transmisión con el proveedor ni un aviso de transferencia específico
+    dentro de la autorización. La Ley 1581 exige informar la finalidad y el destinatario, y cuando el
+    país no está declarado con nivel adecuado, obtener autorización expresa. También hay que verificar
+    la modalidad contratada del proveedor: no se afirma que no entrene con los datos; eso debe estar
+    cubierto por los términos y la configuración.
+  </p>
+</div>
+<ul>
+  <li><strong>Minimización antes de enviar.</strong> El servicio de IA no recibe archivos ni identidad: recibe texto extraído y la rúbrica. El nombre del archivo se conserva en la evidencia, y por eso las rutas también se tratan como dato.</li>
+  <li><strong>Sin memoria del proveedor por diseño.</strong> La llamada es sin estado y no se reutiliza para otras evaluaciones. El backend guarda la nota y la evidencia, no la conversación.</li>
+  <li><strong>Un proveedor alternativo es un adaptador.</strong> Cambiar de proveedor no cambia el dominio, pero sí el país y las garantías: el análisis de transferencia habría que rehacerlo.</li>
+</ul>
+
+<h2 id="ia">IA, transparencia y no discriminación</h2>
+<p>
+  A noviembre de 2026 <strong>no existe en Colombia una ley general de inteligencia artificial
+  vigente</strong>. El Proyecto de Ley 043 de 2025 (Senado) / 324 de 2025 (Cámara) sigue en trámite,
+  y el Proyecto de Ley 282 de 2026 propone una reforma parcial a la Ley 1581. Ninguno es exigible
+  todavía. Eso no deja el uso de IA sin reglas: la Ley 1581 se aplica a todo tratamiento de datos,
+  incluido el que hace un modelo, y la Ley 1482 prohíbe discriminar.
+</p>
+
+<div class="rejilla rejilla--2">
+  <div class="tarjeta">
+    <span class="tarjeta__num">Diseño</span>
+    <h3>Explicación por criterio</h3>
+    <p>La nota no es un número opaco: cada criterio trae puntaje, peso y evidencia textual. La nota final se recalcula en el servicio, no la escribe el modelo.</p>
+  </div>
+  <div class="tarjeta">
+    <span class="tarjeta__num">Control</span>
+    <h3>Humanos antes de la consecuencia</h3>
+    <p>La descalificación pasa por moderación con justificación escrita y SLA de 24 horas. Una disputa la decide otro moderador. Los pagos están fuera de alcance, así que hoy no hay una consecuencia económica real que automatizar.</p>
+  </div>
+  <div class="tarjeta">
+    <span class="tarjeta__num">Sesgo</span>
+    <h3>No se recogen datos demográficos</h3>
+    <p>Eso evita un perfilado discriminatorio, pero también impide medir impacto diferencial por grupo. La métrica no existe y se declara: inventarla sería peor que reconocer el límite.</p>
+  </div>
+  <div class="tarjeta">
+    <span class="tarjeta__num">Automatización</span>
+    <h3>La invitación solo dice sí</h3>
+    <p>La política automática acepta a quien cumple y deja al resto en revisión. Nunca rechaza. Un rechazo automático sería un algoritmo cerrando una puerta sin que nadie mire.</p>
+  </div>
+</div>
+
+<h3>Buenas prácticas que se adoptan sin que sean ley</h3>
+<ul>
+  <li><strong>Principios de la OCDE sobre IA</strong> y <strong>Recomendación de la UNESCO sobre la ética de la IA</strong>: valor humano, transparencia, robustez y supervisión. Colombia adhiere a ambos marcos; no son vinculantes por sí solos.</li>
+  <li><strong>Lineamientos de la SIC</strong> sobre IA y protección de datos: tratar la IA como tratamiento de datos, informar la finalidad y hacer evaluación de impacto cuando el riesgo lo justifique.</li>
+  <li><strong>Evaluación de impacto</strong> antes de ampliar el uso de IA a decisiones con efecto jurídico o económico. No está hecha; es el siguiente paso si el producto sale del piloto.</li>
+</ul>
+
+<h2 id="seguridad-legal">Seguridad y deber de custodia</h2>
+<p>
+  La Ley 1581 exige medidas técnicas y administrativas proporcionales al riesgo. Las que existen
+  están en <a href="backend.html#seguridad">Backend</a> y se resumen aquí: cifrado de datos
+  personales en reposo, hash separado para poder buscar sin descifrar, argon2id, PASETO, límites de
+  peticiones, bucket privado, enlaces firmados de cinco minutos, registro de revelaciones y pruebas
+  de autorización.
+</p>
+<div class="tabla-envoltura">
+  <table class="tabla-compacta">
+    <thead><tr><th>Medida</th><th>Estado</th><th>Observación</th></tr></thead>
+    <tbody>
+      <tr><td>Cifrado en reposo de PII</td><td><span class="insignia insignia--ok">implementado</span></td><td>AES-256-GCM; el correo se busca por hash determinista.</td></tr>
+      <tr><td>Rotación de la clave de cifrado</td><td><span class="insignia insignia--pendiente">pendiente</span></td><td>Cambiar la clave hoy exige un procedimiento manual no documentado.</td></tr>
+      <tr><td>Respaldos y restauración probada</td><td><span class="insignia insignia--parcial">parcial</span></td><td>Hay política de respaldo; no hay una prueba de restauración registrada.</td></tr>
+      <tr><td>Plan de respuesta a incidentes</td><td><span class="insignia insignia--parcial">parcial</span></td><td>Hay alertas de seguridad; falta el procedimiento, los plazos y los responsables de notificar.</td></tr>
+      <tr><td>Notificación de incidentes a la SIC y titulares</td><td><span class="insignia insignia--pendiente">pendiente</span></td><td>Depende del plan anterior.</td></tr>
+      <tr><td>Revisión de accesos y mínimo privilegio</td><td><span class="insignia insignia--parcial">parcial</span></td><td>El diseño de roles existe; no hay revisión periódica documentada.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 id="propiedad">Propiedad intelectual y licencias</h2>
+<ul>
+  <li><strong>El código y las rúbricas</strong> son obra del equipo. No hay una licencia publicada en los repositorios: el código no es abierto por el solo hecho de estar en GitHub. Si se abre, hace falta una licencia explícita.</li>
+  <li><strong>Dependencias.</strong> Angular, NestJS, PrimeNG, FastAPI y el resto usan licencias MIT, Apache-2.0 o BSD. Hay que conservar avisos y, si se distribuye la APK, incluir las licencias que correspondan. No hay todavía un archivo <code>NOTICE</code> agregado.</li>
+  <li><strong>Tipografías.</strong> Archivo e IBM Plex se distribuyen bajo SIL Open Font License, que permite usarlas en un producto. El sitio las carga desde Google Fonts.</li>
+  <li><strong>Mermaid.</strong> Licencia MIT. Los diagramas se renderizan en el navegador; no se envían a un servicio externo.</li>
+  <li><strong>Entregas de los candidatos.</strong> La obra es del candidato. La plataforma necesita una licencia limitada para evaluarla y mostrarla al reclutador, y no debería usarla para entrenar modelos. Esa autorización no está hoy en unos términos de servicio: <span class="insignia insignia--pendiente">pendiente</span>.</li>
+  <li><strong>Datos para mejorar el producto.</strong> No se usan entregas para entrenar modelos propios. Si se quisiera hacer, requeriría una finalidad nueva, consentimiento separado y una base legal distinta.</li>
+</ul>
+
+<h2 id="accesibilidad-legal">Accesibilidad</h2>
+<p>
+  La NTC 5854 establece requisitos de accesibilidad para contenido web, alineados con WCAG 2.0. El
+  proyecto apunta a WCAG 2.1 AA: enlace de salto, foco visible, contraste mínimo, navegación por
+  teclado, diálogos con gestión de foco, regiones <code>aria-live</code> y respeto por
+  <code>prefers-reduced-motion</code>.
+</p>
+<div class="aviso aviso--aviso">
+  <p class="aviso__titulo">Objetivo, no certificación</p>
+  <p>
+    No se ha hecho una auditoría con personas usuarias ni con herramientas especializadas sobre todas
+    las pantallas. Decir «cumple WCAG 2.1 AA» sin esa auditoría sería una afirmación sin evidencia.
+    El estado real es <strong>parcial</strong>: hay decisiones correctas y falta verificación
+    sistemática.
+  </p>
+</div>
+
+<h2 id="matriz">Matriz de cumplimiento</h2>
+<div class="tabla-envoltura">
+  <table>
+    <thead><tr><th>Área</th><th>Qué está</th><th>Qué falta</th><th>Estado</th></tr></thead>
+    <tbody>
+      <tr><td>Consentimiento</td><td>Tres finalidades, historial, revocación y efecto real</td><td>Texto del aviso publicado y versionado fuera del código</td><td><span class="insignia insignia--ok">implementado</span></td></tr>
+      <tr><td>Derechos</td><td>Acceso, supresión y revocación</td><td>Rectificación y canal de PQRS</td><td><span class="insignia insignia--parcial">parcial</span></td></tr>
+      <tr><td>Datos sensibles</td><td>Biometría con consentimiento, retención de 90 días y alternativa</td><td>Evaluación de impacto específica</td><td><span class="insignia insignia--parcial">parcial</span></td></tr>
+      <tr><td>Seguridad</td><td>Cifrado, hash, PASETO, límites, bucket privado</td><td>Rotación de claves y prueba de restauración</td><td><span class="insignia insignia--parcial">parcial</span></td></tr>
+      <tr><td>Transparencia</td><td>Permisos con descripción y efecto; evidencia por criterio</td><td>Política de tratamiento y aviso publicados</td><td><span class="insignia insignia--parcial">parcial</span></td></tr>
+      <tr><td>Transferencias</td><td>Minimización y proveedor identificado</td><td>Contrato, aviso y autorización expresa</td><td><span class="insignia insignia--pendiente">pendiente</span></td></tr>
+      <tr><td>RNBD</td><td>—</td><td>Evaluar umbral y registrar si aplica</td><td><span class="insignia insignia--pendiente">pendiente</span></td></tr>
+      <tr><td>Incidentes</td><td>Alertas técnicas</td><td>Plan, plazos y notificación</td><td><span class="insignia insignia--pendiente">pendiente</span></td></tr>
+      <tr><td>IA responsable</td><td>Explicación, revisión humana, anti-inyección, invitación que no rechaza</td><td>Medición de sesgo y evaluación de impacto</td><td><span class="insignia insignia--parcial">parcial</span></td></tr>
+      <tr><td>Propiedad intelectual</td><td>Dependencias identificadas; sin uso de entregas para entrenar</td><td>Términos de servicio, licencia y NOTICE</td><td><span class="insignia insignia--parcial">parcial</span></td></tr>
+      <tr><td>Accesibilidad</td><td>Diseño con criterios AA</td><td>Auditoría y pruebas con usuarios</td><td><span class="insignia insignia--parcial">parcial</span></td></tr>
+      <tr><td>Menores de edad</td><td>—</td><td>Verificación de edad o declaración y tratamiento del consentimiento parental</td><td><span class="insignia insignia--pendiente">pendiente</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 id="pendientes">Lo que hay que cerrar antes de producción</h2>
+<ol class="pasos">
+  <li><h3>Política de tratamiento y aviso de privacidad</h3><p>Publicar responsable, finalidades, canales, plazos, transferencias y vigencia. La versión que se acepta debe corresponder a ese documento, no solo a un número en el código.</p></li>
+  <li><h3>Canal de PQRS y procedimiento</h3><p>Definir correo o formulario, responsable, acuse de recibo y plazos de 10 y 15 días hábiles. Sin canal, los derechos existen en el papel.</p></li>
+  <li><h3>Contrato de transmisión con el proveedor de IA</h3><p>Documentar país, garantías, retención y uso de los datos. Añadir la autorización expresa de transferencia al flujo de consentimiento.</p></li>
+  <li><h3>Evaluación de impacto</h3><p>Hacerla para biometría y para calificación automatizada, con revisión de sesgos y de la posibilidad de error.</p></li>
+  <li><h3>Retención de entregas y evaluaciones</h3><p>Hoy no hay plazo definido para los archivos y las notas. La fotografía tiene 90 días; el resto, no.</p></li>
+  <li><h3>RNBD y designación del responsable de protección de datos</h3><p>Evaluar si aplica el registro y dejar por escrito quién asume la función y cómo se le contacta.</p></li>
+  <li><h3>Plan de incidentes y rotación de claves</h3><p>Procedimiento, responsables, plazos de notificación y una prueba de restauración registrada.</p></li>
+  <li><h3>Términos de servicio y licencias</h3><p>Licencia limitada sobre las entregas, reglas de uso aceptable, propiedad intelectual y archivo de avisos de terceros.</p></li>
+</ol>
+
+<div class="aviso aviso--ok">
+  <p class="aviso__titulo">Lo que sí se puede afirmar hoy</p>
+  <p>
+    El sistema no trata datos sin una finalidad declarada, no comparte identidad con el reclutador sin
+    un acto explícito y auditado, no publica un perfil sin permiso, no borra la prueba de un
+    consentimiento y no convierte una decisión automatizada en una descalificación sin revisión
+    humana. Eso no equivale a cumplimiento total. Equivale a que las obligaciones centrales tengan
+    código detrás y las que faltan estén escritas con nombre y apellido.
+  </p>
+</div>
+      </div>
+      <nav class="paginacion" aria-label="Navegación entre páginas">
+        <a href="rag.html"><span>← Anterior</span><strong>Mentor RAG</strong></a>
+        <a class="paginacion__siguiente" href="requisitos.html"><span>Siguiente →</span><strong>Requisitos</strong></a>
+      </nav>
+    </main>
+    <aside id="sitio-toc" aria-label="Contenido de la página"></aside>
+  </div>
+  <div id="sitio-pie"></div>
+  <noscript>
+    <div style="max-width:900px;margin:0 auto;padding:24px">
+      <p><strong>La navegación lateral necesita JavaScript.</strong> Estas son las secciones:</p>
+      <ul>
+        <li><a href="index.html">MeritIA · Documentación</a></li>
+        <li><a href="arquitectura.html">Arquitectura</a></li>
+        <li><a href="frontend.html">Frontend</a></li>
+        <li><a href="backend.html">Backend</a></li>
+        <li><a href="ia.html">Servicio de IA</a></li>
+        <li><a href="rag.html">Mentor RAG</a></li>
+        <li><a href="leyes.html">Leyes y privacidad</a></li>
+        <li><a href="requisitos.html">Requisitos</a></li>
+        <li><a href="operacion.html">Operación</a></li>
+        <li><a href="decisiones.html">Decisiones de arquitectura</a></li>
+        <li><a href="estado.html">Estado del proyecto</a></li>
+      </ul>
+    </div>
+  </noscript>
+  <script src="assets/js/mermaid.min.js" defer></script>
+  <script src="assets/js/site.js" defer></script>
+</body>
+</html>

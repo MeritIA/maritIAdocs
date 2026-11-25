@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="es" data-page="operacion">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Operación · MeritIA</title>
+  <meta name="description" content="Despliegue, CI/CD, variables, salud, respaldos, capacidad y runbook para los fallos que se esperan.">
+  <meta name="author" content="MeritIA">
+  <meta name="theme-color" content="#08080a" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f7f7f8" media="(prefers-color-scheme: light)">
+  <meta name="color-scheme" content="dark light">
+  <link rel="canonical" href="https://meritia.github.io/maritIAdocs/operacion.html">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/img/logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/site.css">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MeritIA · Documentación">
+  <meta property="og:locale" content="es_CO">
+  <meta property="og:title" content="Operación · MeritIA">
+  <meta property="og:description" content="Despliegue, CI/CD, variables, salud, respaldos, capacidad y runbook para los fallos que se esperan.">
+  <meta property="og:url" content="https://meritia.github.io/maritIAdocs/operacion.html">
+  <meta property="og:image" content="https://meritia.github.io/maritIAdocs/assets/img/og.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Operación · MeritIA">
+  <meta name="twitter:description" content="Despliegue, CI/CD, variables, salud, respaldos, capacidad y runbook para los fallos que se esperan.">
+  <meta name="twitter:image" content="https://meritia.github.io/maritIAdocs/assets/img/og.svg">
+  <script>
+    try { var t = localStorage.getItem('meritia-docs-tema'); if (t === 'claro') document.documentElement.dataset.tema = 'claro'; } catch (e) {}
+  </script>
+</head>
+<body>
+  <a class="salto" href="#contenido">Saltar al contenido</a>
+  <div id="sitio-barra"></div>
+  <div class="envoltura">
+    <aside id="sitio-lateral"></aside>
+    <main id="contenido" class="principal">
+      <div class="prosa">
+<header class="cabecera-pagina">
+  <span class="ceja">Operación</span>
+  <h1>El sistema no está desplegado, y la página empieza por decirlo.</h1>
+  <p class="entradilla">
+    Hay pipeline, imágenes, un <code>compose</code> de producción, health checks y un plan de escalado
+    con disparadores medidos. Lo que no hay todavía es un servidor encendido: el paso de despliegue
+    existe y falla a propósito hasta que se elija proveedor. Esta página separa lo que está listo de
+    lo que falta para que nadie confunda «pasa la CI» con «está en producción».
+  </p>
+  <div class="metas">
+    <span class="meta">GitHub Actions</span>
+    <span class="meta">Docker + Caddy</span>
+    <span class="meta meta--acento">Despliegue desactivado</span>
+    <span class="meta">Un solo servidor</span>
+  </div>
+</header>
+
+<div class="aviso aviso--peligro">
+  <p class="aviso__titulo">Estado real, sin adornos</p>
+  <p>
+    El backend publica una imagen en GHCR cuando la integración continua termina en verde. Esa imagen
+    <strong>no se despliega en ningún sitio</strong>: el trabajo de despliegue está detrás de
+    <code>DESPLIEGUE_HABILITADO</code> y, mientras valga otra cosa que <code>true</code>, no se
+    ejecuta. El frontend tampoco tiene despliegue automático y, además, su constante de API sigue
+    apuntando a <code>localhost</code>, lo que impediría usarlo desde otro origen. No hay entorno
+    público de producción.
+  </p>
+</div>
+
+<h2 id="ci">Integración continua</h2>
+<p>
+  Un solo pipeline en <code>.github/workflows/ci.yml</code> produce un solo artefacto: la imagen del
+  backend. El orden no es estético: el artefacto depende de que todo lo demás pase, así que un secreto
+  filtrado o una prueba en rojo no llegan a publicar nada.
+</p>
+
+<div class="diagrama diagrama--ancho">
+  <div class="diagrama__cabecera"><span class="punto"></span>Del push a la imagen</div>
+  <div class="diagrama__lienzo">
+    <div class="mermaid">
+flowchart LR
+  P["Push o PR"] --> S["Secretos<br/>Gitleaks · historial completo"]
+  P --> D["Dependencias<br/>npm audit · críticas"]
+  P --> L["Lint y build<br/>OpenAPI --check"]
+  P --> T["Pruebas<br/>unitarias + integración"]
+  S --> A{"¿Todo verde<br/>en main?"}
+  D --> A
+  L --> A
+  T --> A
+  T --> Q["SonarQube<br/>quality gate"]
+  Q --> A
+  A -->|"no"| X["Sin imagen"]
+  A -->|"sí"| I["Imagen GHCR<br/>SHA completo + main"]
+  I --> E{"DESPLIEGUE<br/>HABILITADO"}
+  E -->|"false"| N["No se despliega<br/>y main no se pone rojo"]
+  E -->|"true"| H["SSH al servidor<br/>migraciones + compose"]
+  H --> V["GET /api/salud<br/>hasta 5 minutos"]
+  V -->|"no responde 200"| F["Despliegue falla"]
+    </div>
+  </div>
+  <div class="diagrama__pie">Las acciones de GitHub van fijadas por SHA, no por etiqueta: una etiqueta se puede mover a código malicioso. Dependabot mantiene esos SHA al día.</div>
+</div>
+
+<div class="tabla-envoltura">
+  <table>
+    <thead><tr><th>Trabajo</th><th>Falla si</th><th>Observación</th></tr></thead>
+    <tbody>
+      <tr><td>Secretos</td><td>Hay un secreto en cualquier commit del historial</td><td>Gitleaks escanea todo el historial, no el último commit. Los falsos positivos se ignoran por huella exacta, nunca por patrón.</td></tr>
+      <tr><td>Dependencias</td><td>Hay una vulnerabilidad crítica</td><td><code>npm audit --audit-level=critical</code>.</td></tr>
+      <tr><td>Lint, build y contrato</td><td>Lint, formato o compilación fallan, o el OpenAPI publicado no coincide con el código</td><td>El contrato se genera desde los decoradores y se compara con <code>docs/openapi.json</code>.</td></tr>
+      <tr><td>Pruebas y cobertura</td><td>Una prueba falla o la cobertura baja del umbral</td><td>80 % en sentencias, líneas y funciones; 70 % en ramas. Medido hoy: 89,6 % y 77 %.</td></tr>
+      <tr><td>Análisis estático</td><td>La <em>quality gate</em> de SonarQube no pasa</td><td>Si no está configurado, avisa y no bloquea.</td></tr>
+      <tr><td>Artefacto</td><td>—</td><td>Solo en push a <code>main</code> con todo lo anterior en verde. Etiqueta con el SHA completo y con <code>main</code>.</td></tr>
+      <tr><td>Despliegue</td><td>Falta un secreto del ambiente o el health check no responde</td><td>Hoy no se ejecuta. Está desactivado a propósito.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3>Las pruebas no usan secretos guardados</h3>
+<p>
+  <code>scripts/preparar-env-ci.mjs</code> genera claves PASETO, clave AES y contraseñas en cada
+  ejecución; mueren con ella y se enmascaran en los registros. Cada ambiente
+  (<code>desarrollo</code>, <code>pruebas</code>, <code>produccion</code>) es un
+  <em>Environment</em> de GitHub con sus propios secretos, y el trabajo de despliegue no usa
+  <code>secrets: inherit</code>. Un secreto de repositorio sería visible para todos los ambientes, que
+  es justo lo que el criterio prohíbe.
+</p>
+
+<h2 id="despliegue">Qué haría un despliegue</h2>
+<ol class="pasos">
+  <li><h3>Comprobar los secretos del ambiente</h3><p>Si falta uno de los diez, falla diciendo cuál. No arranca a medias.</p></li>
+  <li><h3>Copiar la configuración desde el repositorio</h3><p><code>compose.produccion.yaml</code> y el <code>Caddyfile</code> salen de <code>main</code>, no de lo que alguien editó a mano en el servidor hace tres semanas.</p></li>
+  <li><h3>Escribir el <code>.env</code> en el servidor</h3><p>Por la tubería de SSH y con <code>umask 077</code>. Nunca toca el disco del runner.</p></li>
+  <li><h3>Bajar la imagen por digest</h3><p><code>ghcr.io/…@sha256:…</code>. Un digest no puede cambiar entre la construcción y el despliegue; una etiqueta sí.</p></li>
+  <li><h3>Correr las migraciones antes de levantar</h3><p>Un contenedor nuevo contra un esquema viejo no falla al arrancar: falla en la primera consulta de un usuario.</p></li>
+  <li><h3>Levantar con compose</h3><p>PostgreSQL, Redis, almacenamiento, backend y proxy. Las bases no publican puertos.</p></li>
+  <li><h3>Esperar el health check</h3><p><code>GET /api/salud</code> hasta cinco minutos. Un <code>up -d</code> que devuelve cero no significa que la aplicación funcione.</p></li>
+</ol>
+
+<div class="rejilla rejilla--2">
+  <div class="tarjeta">
+    <h3>Hace falta un dominio, y no es preferencia</h3>
+    <p>La cookie de sesión se emite con <code>Secure</code> en producción. Sobre HTTP plano el navegador la descarta sin avisar: el login responde 200 y la siguiente petición va sin sesión. Se vería como un bucle de vuelta a «Entrar», con los registros limpios. Let's Encrypt no emite certificados para una IP, así que hace falta un dominio o un subdominio de DuckDNS.</p>
+  </div>
+  <div class="tarjeta">
+    <h3>Frontend y API en el mismo origen</h3>
+    <p>La cookie va con <code>SameSite=strict</code>. Un frontend en otro dominio no la enviaría nunca. Caddy sirve <code>/srv/web</code> en <code>/</code> y hace de proxy del backend en <code>/api</code>; la constante <code>API</code> del front tendría que pasar a <code>/api/v1</code>. Hoy sigue en <code>http://localhost:3000/api/v1</code>: es lo que impide desplegar el front.</p>
+  </div>
+</div>
+
+<h2 id="topologia">La topología prevista</h2>
+<div class="diagrama diagrama--ancho">
+  <div class="diagrama__cabecera"><span class="punto"></span>Un servidor, cinco contenedores</div>
+  <div class="diagrama__lienzo">
+    <div class="mermaid">
+flowchart TB
+  U["Navegador<br/>HTTPS"] --> C["Caddy<br/>TLS · :443"]
+  C -->|"/"| W["Frontend estático<br/>/srv/web"]
+  C -->|"/api"| B["Backend<br/>NestJS · no-root"]
+  B --> PG[("PostgreSQL 17<br/>sin puerto publicado")]
+  B --> RD[("Redis 8.2<br/>sin puerto publicado")]
+  B --> S3["Almacenamiento S3<br/>sin puerto publicado"]
+  B -->|"HTTP + clave"| IA["ai-service"]
+  B -->|"HTTP + clave"| RAG["rag-service"]
+  IA --> G["Gemini"]
+  RAG --> G
+    </div>
+  </div>
+  <div class="diagrama__pie">Solo 22, 80 y 443 abiertos. El cortafuegos es el segundo cerrojo; el primero es que el compose de producción no publica los puertos de las bases.</div>
+</div>
+
+<h2 id="salud">Salud: dos preguntas distintas</h2>
+<p>
+  Mezclar «el proceso está vivo» con «las dependencias responden» es un error operativo conocido: si
+  el health check del contenedor falla porque la base está caída, el orquestador reinicia el
+  contenedor una y otra vez sin arreglar nada.
+</p>
+<div class="tabla-envoltura">
+  <table>
+    <thead><tr><th>Ruta</th><th>Qué responde</th><th>Quién la usa</th></tr></thead>
+    <tbody>
+      <tr><td><code>GET /api/salud</code></td><td>200 si el proceso sirve HTTP. No toca dependencias.</td><td>El <code>HEALTHCHECK</code> del contenedor y el paso final del despliegue.</td></tr>
+      <tr><td><code>GET /api/salud/listo</code></td><td>Comprueba base, almacenamiento, cola y servicio de IA en paralelo, con 3 s máximo cada una. 200 si todo está en pie o solo falla algo no crítico; 503 si cae una crítica.</td><td>El balanceador, cuando exista, para decidir si manda tráfico.</td></tr>
+    </tbody>
+  </table>
+</div>
+<div class="aviso">
+  <p class="aviso__titulo">Sin IA se sigue trabajando</p>
+  <p>
+    El servicio de IA está marcado como dependencia <strong>no crítica</strong>: sin él se siguen
+    recibiendo entregas y la cola las evalúa al volver (<a href="decisiones.html#adr-0007">ADR-0007</a>).
+    Sin base de datos no se puede servir nada; sin almacenamiento no se pueden recibir archivos; sin
+    cola no se pueden calificar. Esa distinción está en el código, no solo en la documentación.
+  </p>
+</div>
+
+<h2 id="observabilidad">Observabilidad</h2>
+<ul>
+  <li><strong>Registro estructurado sin datos sensibles.</strong> Nunca contraseñas, tokens ni texto de entregas. Cada error lleva una referencia UUID que permite cruzar una queja con la línea del log sin enseñar el interior.</li>
+  <li><strong>Alertas por patrón, no por evento.</strong> Los contadores viven en Redis: cinco fallos de autenticación de la misma clave en la ventana disparan un correo; un solo fallo se registra y no avisa. Así una alerta significa algo.</li>
+  <li><strong>Eventos de seguridad siempre registrados.</strong> Aunque no se avise, el intento de autenticación fallido, el límite excedido y la inyección detectada quedan escritos.</li>
+  <li><strong>Cola observable.</strong> <code>GET /evaluaciones/cola</code> expone el estado de los trabajos: es el instrumento que el plan de escalado usa como disparador de la etapa 2.</li>
+  <li><strong>Sin trazas distribuidas.</strong> No hay OpenTelemetry ni un colector central. Para una etapa 0 con un proceso y una base, el log estructurado alcanza; decirlo es parte del estado real.</li>
+</ul>
+
+<h2 id="capacidad">Capacidad y cuándo crecer</h2>
+<p>
+  La medición está en <a href="backend.html#rendimiento">Backend</a>: 79 peticiones por segundo sanas,
+  83 ms de p95 y colapso a 50 iteraciones por segundo. El cuello es el <em>event loop</em> de Node, no
+  una consulta lenta ni la base de datos. Cada etapa del plan tiene un disparador medible; sin el
+  número, no se empieza.
+</p>
+<div class="tabla-envoltura">
+  <table>
+    <thead><tr><th>Etapa</th><th>Disparador</th><th>Qué se hace</th><th>Coste real</th></tr></thead>
+    <tbody>
+      <tr><td>1 · Varias copias</td><td>503 sostenidos del control de admisión, o CPU pegada al 100 % de un núcleo con p95 fuera de objetivo</td><td>N copias detrás de un balanceador; ganancia casi lineal hasta llenar los núcleos</td><td>Mover los contadores de alertas a Redis: es la única pieza con estado en memoria.</td></tr>
+      <tr><td>2 · Worker aparte</td><td>La cola crece de forma sostenida <strong>y</strong> las peticiones web empeoran a la vez</td><td>Misma imagen con <code>COLA_WORKER_HABILITADO</code> en <code>false</code> para HTTP y <code>true</code> para trabajos</td><td>Dos despliegues y dos cosas que vigilar. Es configuración, no desarrollo.</td></tr>
+      <tr><td>3 · Reportes proyectados</td><td>El informe de una vacante pasa de 500 ms de p95</td><td>Escuchar <code>evaluacion-finalizada</code> y mantener una tabla con la forma del informe</td><td>Una copia que se puede desincronizar: hace falta reconstruirla y comprobarla.</td></tr>
+      <tr><td>4 · Un módulo a servicio</td><td>Organizativo: dos equipos necesitan desplegar a ritmos distintos</td><td>Empezar por evaluación, luego reportes</td><td>Llamadas de red que pueden fallar solas. Partir por volumen antes de eso no compensa.</td></tr>
+      <tr><td>5 · La base</td><td>Contención en PostgreSQL, que hoy no existe (11 conexiones de 100)</td><td>Réplica de lectura, luego instancia por módulo, luego particionar evaluaciones</td><td>Complejidad operativa y coherencia que antes era gratis.</td></tr>
+    </tbody>
+  </table>
+</div>
+<div class="aviso aviso--aviso">
+  <p class="aviso__titulo">Un requisito que la etapa 0 todavía no cumple</p>
+  <p>
+    El control de admisión responde 503 con <code>Retry-After</code> al superar 50 peticiones en
+    vuelo, pero la cifra que lo dimensiona salió de una medición anterior al control. Falta
+    <strong>re-medir</strong> el punto de caída con el middleware puesto. La recuperación tras un pico
+    en 60 s y la ausencia de fugas de memoria tampoco están medidas: no hay <em>soak</em>.
+  </p>
+</div>
+
+<h2 id="respaldo">Respaldos y recuperación</h2>
+<div class="aviso aviso--peligro">
+  <p class="aviso__titulo">No hay copias de seguridad</p>
+  <p>
+    Los volúmenes viven en el servidor. Si se pierde la máquina, se pierden los datos. No hay
+    <code>pg_dump</code> programado, ni retención, ni una restauración probada. Es una deuda declarada
+    que hay que cerrar antes de recibir datos de personas reales, no después.
+  </p>
+</div>
+<p>Lo que tampoco hay, dicho en voz alta:</p>
+<ul>
+  <li><strong>Alta disponibilidad.</strong> Un solo servidor, sin balanceo. Si se cae, se cayó. Para un MVP es una decisión; para producción, un riesgo.</li>
+  <li><strong>Vuelta atrás automática.</strong> Si el health check falla, la versión nueva ya está arriba y rota. Volver es desplegar el commit anterior.</li>
+  <li><strong>Migraciones reversibles en el despliegue.</strong> Tienen su <code>down</code>, pero el despliegue no lo ejecuta: deshacer una migración con datos encima es una decisión humana.</li>
+  <li><strong>Rotación de la clave de cifrado.</strong> Cambiar <code>ENCRYPTION_KEY</code> hoy exige un procedimiento manual no documentado.</li>
+</ul>
+
+<h2 id="runbook">Runbook de fallos esperados</h2>
+<div class="tabla-envoltura">
+  <table>
+    <thead><tr><th>Síntoma</th><th>Qué mirar primero</th><th>Acción</th></tr></thead>
+    <tbody>
+      <tr><td>503 con <code>Retry-After</code></td><td>Peticiones en vuelo y CPU del proceso</td><td>Es el control de admisión haciendo su trabajo. Si es sostenido, aplicar etapa 1; no subir el límite sin medir.</td></tr>
+      <tr><td>502 o 503 en evaluaciones</td><td><code>GET /evaluaciones/cola</code> y <code>/api/salud/listo</code></td><td>Si el proveedor de IA está caído, la cola reintenta según <code>reintentable</code>. Las entregas no se rechazan.</td></tr>
+      <tr><td>Entregas que quedan «en evaluación»</td><td>Worker y Redis</td><td>Comprobar <code>COLA_WORKER_HABILITADO</code> en el proceso que debería consumir. Reencolar es seguro: el id del trabajo es el de la entrega.</td></tr>
+      <tr><td>Login que «funciona» y vuelve a la pantalla de entrar</td><td>Esquema de la URL y cabecera <code>Set-Cookie</code></td><td>Falta TLS o el frontend está en otro origen. La cookie <code>Secure</code> y <code>SameSite=strict</code> se descarta en silencio.</td></tr>
+      <tr><td>El despliegue falla en el health check</td><td>Logs del contenedor y migraciones</td><td>La versión nueva ya está arriba. Desplegar el commit anterior; no reiniciar a ciegas.</td></tr>
+      <tr><td>Disco lleno</td><td>Volumen de PostgreSQL, almacenamiento y logs</td><td>Las entregas y las fotos crecen sin límite global. No hay purga de entregas: es una deuda de retención.</td></tr>
+      <tr><td>Certificado vencido</td><td>Caddy y renovación de Let's Encrypt</td><td>Renovar el dominio. Sin TLS válido, el login deja de funcionar por la cookie <code>Secure</code>.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 id="variables">Variables de entorno</h2>
+<p>
+  El arranque valida la configuración: si falta una obligatoria o un valor es inseguro, el proceso no
+  levanta. Es preferible a arrancar con una clave por omisión.
+</p>
+<div class="tabla-envoltura">
+  <table class="tabla-compacta">
+    <thead><tr><th>Variable</th><th>Para qué</th></tr></thead>
+    <tbody>
+      <tr><td><code>NODE_ENV</code></td><td><code>development</code>, <code>test</code> o <code>production</code>. Cambia cookie segura, documentación y validaciones.</td></tr>
+      <tr><td><code>DATABASE_*</code></td><td>Conexión a PostgreSQL; la contraseña llega por secreto del ambiente.</td></tr>
+      <tr><td><code>REDIS_*</code></td><td>Rate limiting, alertas y cola BullMQ.</td></tr>
+      <tr><td><code>ENCRYPTION_KEY</code></td><td>Clave AES-256-GCM para datos personales. Distinta por ambiente.</td></tr>
+      <tr><td><code>PASETO_PRIVATE_KEY</code> / <code>PASETO_PUBLIC_KEY</code></td><td>Firma y verificación Ed25519. Se generan con <code>npm run claves:generar</code>.</td></tr>
+      <tr><td><code>S3_*</code></td><td>Almacenamiento de entregas y fotos; bucket privado y URLs firmadas.</td></tr>
+      <tr><td><code>AI_SERVICE_URL</code> / <code>AI_SERVICE_API_KEY</code></td><td>Servicio de evaluación. Sin ellas entra el evaluador honesto, que falla con motivo en vez de inventar una nota.</td></tr>
+      <tr><td><code>COLA_WORKER_HABILITADO</code></td><td>Si este proceso consume la cola. Es el interruptor de la etapa 2.</td></tr>
+      <tr><td><code>LIMITE_PETICIONES_EN_VUELO</code></td><td>Control de admisión; 50 por omisión.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 id="checklist">Antes de llamarlo producción</h2>
+<ol class="pasos">
+  <li><h3>Elegir proveedor e implementar el paso de despliegue</h3><p>Mientras el paso no exista, activar la variable solo deja <code>main</code> en rojo en cada commit.</p></li>
+  <li><h3>Dominio y TLS</h3><p>Sin HTTPS la cookie de sesión no viaja. Es un bloqueante, no una mejora.</p></li>
+  <li><h3>Cambiar la constante de API del frontend</h3><p>De <code>http://localhost:3000/api/v1</code> a <code>/api/v1</code>, y servir el build desde Caddy en el mismo origen.</p></li>
+  <li><h3>Respaldos con restauración probada</h3><p>Programar <code>pg_dump</code>, retención y una prueba de restauración registrada.</p></li>
+  <li><h3>Retención de entregas, evaluaciones y fotos</h3><p>La foto biométrica tiene 90 días y un temporizador que la borra. Los archivos y las notas no tienen plazo definido.</p></li>
+  <li><h3>Política de tratamiento, PQRS y transferencia internacional</h3><p>Ver <a href="leyes.html#pendientes">Leyes</a>: sin canal y sin contrato de transmisión, el cumplimiento no se sostiene.</p></li>
+  <li><h3>Re-medir el punto de caída y hacer el soak</h3><p>El 503 existe; el número que lo dimensiona sigue esperando la medición con el control puesto.</p></li>
+  <li><h3>Rotación de claves y plan de incidentes</h3><p>Procedimiento, responsables y plazos de notificación a la SIC y a los titulares.</p></li>
+</ol>
+
+<div class="aviso aviso--ok">
+  <p class="aviso__titulo">Lo que sí está resuelto</p>
+  <p>
+    Un push a <code>main</code> con todo en verde produce una imagen inmutable, identificada por
+    digest, construida con un Node fijado y probada contra las mismas versiones de PostgreSQL, Redis y
+    almacenamiento del entorno local. El pipeline falla ante un secreto, una vulnerabilidad crítica o
+    una prueba roja. El despliegue no se ha inventado: está escrito, es auditable y está apagado a
+    propósito.
+  </p>
+</div>
+      </div>
+      <nav class="paginacion" aria-label="Navegación entre páginas">
+        <a href="requisitos.html"><span>← Anterior</span><strong>Requisitos</strong></a>
+        <a class="paginacion__siguiente" href="decisiones.html"><span>Siguiente →</span><strong>Decisiones de arquitectura</strong></a>
+      </nav>
+    </main>
+    <aside id="sitio-toc" aria-label="Contenido de la página"></aside>
+  </div>
+  <div id="sitio-pie"></div>
+  <noscript>
+    <div style="max-width:900px;margin:0 auto;padding:24px">
+      <p><strong>La navegación lateral necesita JavaScript.</strong> Estas son las secciones:</p>
+      <ul>
+        <li><a href="index.html">MeritIA · Documentación</a></li>
+        <li><a href="arquitectura.html">Arquitectura</a></li>
+        <li><a href="frontend.html">Frontend</a></li>
+        <li><a href="backend.html">Backend</a></li>
+        <li><a href="ia.html">Servicio de IA</a></li>
+        <li><a href="rag.html">Mentor RAG</a></li>
+        <li><a href="leyes.html">Leyes y privacidad</a></li>
+        <li><a href="requisitos.html">Requisitos</a></li>
+        <li><a href="operacion.html">Operación</a></li>
+        <li><a href="decisiones.html">Decisiones de arquitectura</a></li>
+        <li><a href="estado.html">Estado del proyecto</a></li>
+      </ul>
+    </div>
+  </noscript>
+  <script src="assets/js/mermaid.min.js" defer></script>
+  <script src="assets/js/site.js" defer></script>
+</body>
+</html>

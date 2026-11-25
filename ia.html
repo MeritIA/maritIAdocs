@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="es" data-page="ia">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Servicio de IA · MeritIA</title>
+  <meta name="description" content="Evaluación de entregas contra una rúbrica: contrato, validación de salida, defensas contra inyección de prompts y calibración.">
+  <meta name="author" content="MeritIA">
+  <meta name="theme-color" content="#08080a" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f7f7f8" media="(prefers-color-scheme: light)">
+  <meta name="color-scheme" content="dark light">
+  <link rel="canonical" href="https://meritia.github.io/maritIAdocs/ia.html">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/img/logo.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/site.css">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MeritIA · Documentación">
+  <meta property="og:locale" content="es_CO">
+  <meta property="og:title" content="Servicio de IA · MeritIA">
+  <meta property="og:description" content="Evaluación de entregas contra una rúbrica: contrato, validación de salida, defensas contra inyección de prompts y calibración.">
+  <meta property="og:url" content="https://meritia.github.io/maritIAdocs/ia.html">
+  <meta property="og:image" content="https://meritia.github.io/maritIAdocs/assets/img/og.svg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Servicio de IA · MeritIA">
+  <meta name="twitter:description" content="Evaluación de entregas contra una rúbrica: contrato, validación de salida, defensas contra inyección de prompts y calibración.">
+  <meta name="twitter:image" content="https://meritia.github.io/maritIAdocs/assets/img/og.svg">
+  <script>
+    try { var t = localStorage.getItem('meritia-docs-tema'); if (t === 'claro') document.documentElement.dataset.tema = 'claro'; } catch (e) {}
+  </script>
+</head>
+<body>
+  <a class="salto" href="#contenido">Saltar al contenido</a>
+  <div id="sitio-barra"></div>
+  <div class="envoltura">
+    <aside id="sitio-lateral"></aside>
+    <main id="contenido" class="principal">
+      <div class="prosa">
+<header class="cabecera-pagina">
+  <span class="ceja">Servicio de IA</span>
+  <h1>El modelo propone; el servicio valida y calcula la nota.</h1>
+  <p class="entradilla">
+    <code>ai-service</code> es un proceso NestJS independiente que recibe una entrega ya convertida
+    en texto y su rúbrica, y devuelve un puntaje por criterio con evidencia. No tiene base de datos,
+    no recibe archivos y no puede consultar nada: todo lo que necesita viaja en la petición.
+  </p>
+  <div class="metas">
+    <span class="meta">NestJS</span>
+    <span class="meta">Gemini 3.5 Flash</span>
+    <span class="meta meta--acento">Temperatura 0</span>
+    <span class="meta">Sin estado</span>
+    <span class="meta">81 pruebas</span>
+  </div>
+</header>
+
+<h2 id="forma">Qué hace y qué no</h2>
+<div class="rejilla rejilla--2">
+  <div class="tarjeta">
+    <span class="tarjeta__num">Sí</span>
+    <h3>Evaluar contra una rúbrica</h3>
+    <p>Recibe el enunciado, entre uno y veinte criterios con pesos que suman 100, y hasta 200 archivos de texto. Devuelve cada criterio exactamente una vez, con puntaje dentro de su escala y evidencia no vacía.</p>
+  </div>
+  <div class="tarjeta">
+    <span class="tarjeta__num">Sí</span>
+    <h3>Responder como mentor</h3>
+    <p>El mismo proceso expone <code>POST /api/v1/mentor</code> con un resumen del historial. El <code>rag-service</code> ofrece el mismo contrato añadiendo fuentes recuperadas; el backend elige cuál usar.</p>
+  </div>
+  <div class="tarjeta">
+    <span class="tarjeta__num">No</span>
+    <h3>Tocar archivos</h3>
+    <p>La extracción de texto ocurre en el backend. Desempaquetar un <code>.zip</code> de un desconocido es la operación más peligrosa del sistema y no se hace en el proceso que tiene la clave del proveedor.</p>
+  </div>
+  <div class="tarjeta">
+    <span class="tarjeta__num">No</span>
+    <h3>Guardar o consultar</h3>
+    <p>No tiene acceso a PostgreSQL, Redis, almacenamiento ni credenciales del backend. Lo que no tiene, no lo puede filtrar. El backend no confía en su respuesta: la valida antes de persistirla.</p>
+  </div>
+</div>
+
+<h2 id="contrato">El contrato</h2>
+<p>
+  La especificación completa se genera desde el código y vive en <code>openapi.json</code>. La
+  autenticación es una clave compartida que solo conoce el backend; no hay CORS porque ningún
+  navegador tiene nada que hacer aquí.
+</p>
+
+<pre data-lenguaje="http"><code>POST /api/v1/evaluaciones
+Authorization: Bearer &lt;CLAVE_DE_ACCESO&gt;
+Content-Type: application/json
+
+{
+  "idEvaluacion": "7f1c2b8e-3d4a-4c5b-9e6f-1a2b3c4d5e6f",
+  "enunciado": "Implementa una función que invierta una lista.",
+  "criterios": [
+    { "nombre": "Corrección", "descripcion": "Invierte cualquier lista.", "peso": 60, "escalaMaxima": 5 },
+    { "nombre": "Claridad",   "descripcion": "Código legible y ordenado.", "peso": 40, "escalaMaxima": 10 }
+  ],
+  "archivos": [
+    { "ruta": "main.py", "contenido": "def invertir(l):\n    return l[::-1]\n" }
+  ]
+}</code></pre>
+
+<pre data-lenguaje="json"><code>{
+  "idEvaluacion": "7f1c2b8e-3d4a-4c5b-9e6f-1a2b3c4d5e6f",
+  "notaFinal": 68,
+  "criterios": [
+    { "criterio": "Corrección", "puntaje": 4, "escalaMaxima": 5,  "peso": 60, "evidencia": "…" },
+    { "criterio": "Claridad",   "puntaje": 5, "escalaMaxima": 10, "peso": 40, "evidencia": "…" }
+  ],
+  "proveedor": "gemini",
+  "modelo": "gemini-3.5-flash",
+  "seguridad": {
+    "riesgo": "bajo",
+    "puntaje": 12,
+    "banderas": [
+      { "codigo": "CAMBIO_DE_ROL", "archivo": "main.py", "ocurrencias": 1 }
+    ],
+    "versionReglas": "1.0",
+    "versionListaNegra": "1.0"
+  }
+}</code></pre>
+
+<div class="tabla-envoltura">
+  <table class="tabla-compacta">
+    <thead><tr><th>Límite</th><th>Valor</th></tr></thead>
+    <tbody>
+      <tr><td>Criterios</td><td>1 a 20, nombres únicos, pesos que suman exactamente 100</td></tr>
+      <tr><td>Archivos</td><td>1 a 200, hasta 500.000 caracteres cada uno</td></tr>
+      <tr><td>Cuerpo</td><td>2 MB</td></tr>
+      <tr><td>Tiempo máximo</td><td>90 s por llamada, menor que el del backend, con cancelación de la red al vencer</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 id="pipeline">El pipeline de una evaluación</h2>
+<div class="diagrama diagrama--ancho">
+  <div class="diagrama__cabecera"><span class="punto"></span>De la petición a la nota validada</div>
+  <div class="diagrama__lienzo">
+    <div class="mermaid">
+flowchart LR
+  R["Solicitud"] --> V["Validación<br/>rúbrica y límites"]
+  V --> D["Detección de inyección<br/>8 señales · versionada"]
+  D --> P["Prompt<br/>canal de sistema<br/>delimitador de 128 bits"]
+  P --> G["Gemini<br/>temperatura 0<br/>JSON con esquema"]
+  G --> S["Validación de salida<br/>sin confiar en el esquema"]
+  S -->|"cumple"| N["Cálculo de la nota<br/>en el servicio"]
+  N --> O["Respuesta<br/>nota + evidencia + seguridad"]
+  S -->|"no cumple"| E1["502 SALIDA_INVALIDA<br/>reintentable"]
+  G -->|"caído o sin cuota"| E2["503 PROVEEDOR_NO_DISPONIBLE<br/>reintentable"]
+  V -->|"rúbrica inválida"| E3["400 · no reintentable"]
+    </div>
+  </div>
+  <div class="diagrama__pie">La nota final nunca la escribe el modelo: se recalcula como suma ponderada de los puntajes ya validados.</div>
+</div>
+
+<h2 id="defensas">Ocho defensas en la evaluación</h2>
+<ol class="pasos">
+  <li><h3>La rúbrica se valida otra vez</h3><p>Aunque el backend ya la validó, el servicio comprueba pesos que suman 100 y nombres únicos. Una frontera no confía en la otra.</p></li>
+  <li><h3>Instrucción y entrega por canales distintos</h3><p>La defensa va en el canal de sistema del proveedor; la entrega, en el contenido. No es el mismo texto con una etiqueta: son campos distintos del protocolo.</p></li>
+  <li><h3>Delimitador aleatorio por petición</h3><p>128 bits generados en cada llamada. Con uno fijo, una entrega podría cerrarlo y escribir «instrucciones» fuera. Si por azar aparece en el contenido, se genera otro.</p></li>
+  <li><h3>Esquema JSON exigido</h3><p>Los nombres de los criterios viajan como <code>enum</code>: el modelo no puede inventar uno nuevo ni omitir uno existente.</p></li>
+  <li><h3>La salida se valida sin confiar en el esquema</h3><p>JSON válido, cada criterio exactamente una vez, puntajes dentro de su escala y evidencia no vacía. Los campos extra se descartan.</p></li>
+  <li><h3>La nota la calcula el servicio</h3><p>El modelo devuelve puntajes por criterio; el servicio aplica los pesos. Un error aritmético del modelo no se convierte en una nota.</p></li>
+  <li><h3>Temperatura 0</h3><p>Dos entregas iguales deben sacar la misma nota. La creatividad no es una virtud al calificar.</p></li>
+  <li><h3>Tiempo máximo y cancelación</h3><p>90 s por llamada y cancelación de la petición de red al vencer. Un proveedor colgado no bloquea al worker indefinidamente.</p></li>
+</ol>
+
+<h2 id="inyeccion">Detección de inyección de prompts</h2>
+<p>
+  Antes de armar el prompt, la entrega pasa por dos capas de detección. <strong>No bloquea: marca.</strong>
+  El riesgo de un falso positivo es alto —un ejercicio legítimo puede tratar justamente sobre prompts— y
+  bloquear en automático convertiría un falso positivo en un candidato descartado sin que nadie lo
+  revise.
+</p>
+
+<div class="tabla-envoltura">
+  <table>
+    <thead><tr><th>Señal</th><th>Peso</th><th>Ejemplo</th></tr></thead>
+    <tbody>
+      <tr><td>Frase de evasión</td><td>40</td><td>«ignora las instrucciones anteriores», «ignore previous»</td></tr>
+      <tr><td>Pedir la nota</td><td>35</td><td>«pon la nota máxima», «give full marks»</td></tr>
+      <tr><td>Cambio de rol</td><td>30</td><td>«a partir de ahora eres», «you are now»</td></tr>
+      <tr><td>Texto oculto</td><td>30</td><td>Caracteres invisibles o de control</td></tr>
+      <tr><td>Mención del sistema</td><td>25</td><td>«system prompt», «override», «bypass»</td></tr>
+      <tr><td>Cerrar el delimitador</td><td>20</td><td>Intentar imitar el final de la entrega</td></tr>
+      <tr><td>Exigencia de formato</td><td>15</td><td>«output only», «no menciones»</td></tr>
+      <tr><td>Línea desmesurada</td><td>10</td><td>Más de 5.000 caracteres en una línea</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="rejilla rejilla--3">
+  <div class="tarjeta"><span class="tarjeta__num">0</span><h3>Riesgo ninguno</h3><p>Sin señales. La entrega se evalúa igual.</p></div>
+  <div class="tarjeta"><span class="tarjeta__num">1–29</span><h3>Riesgo bajo</h3><p>Se registra la bandera. El prompt lleva el aviso fijo y la evaluación continúa.</p></div>
+  <div class="tarjeta"><span class="tarjeta__num">30–59</span><h3>Riesgo medio</h3><p>Se registra y se aplica la rúbrica igual. El caso puede entrar al muestreo de moderación.</p></div>
+</div>
+
+<div class="aviso aviso--aviso">
+  <p class="aviso__titulo">Lo que viaja en la respuesta</p>
+  <p>
+    Riesgo, puntaje, banderas con archivo y número de ocurrencias, y las versiones de las reglas y de
+    la lista negra. <strong>Nunca el texto del candidato</strong>: si logró manipular al modelo, ese
+    texto es justo lo que no debe acabar copiado en un log o en una base de datos. La lista negra está
+    versionada y solo crece; no se reescribe, porque las evaluaciones viejas siguieron otras reglas.
+  </p>
+</div>
+
+<p>
+  Dos evasiones están cerradas: el texto se normaliza (NFKC) antes de comparar, así que las variantes
+  tipográficas no sirven; y se eliminan los caracteres invisibles, así que <code>ig&lt;zero-width&gt;nora</code>
+  tampoco. Cada código cuenta una sola vez por mucho que se repita: diez copias de la misma frase no
+  son diez ataques.
+</p>
+
+<h2 id="calibracion">Calibración: qué se afirma y qué no</h2>
+<p>
+  El paquete 4.3 pide un conjunto de entregas de referencia. Son cinco, contra una misma rúbrica, cada
+  una elegida para aislar algo distinto. La suite <strong>no corre en la CI</strong>: gasta cuota del
+  proveedor y no es determinista.
+</p>
+
+<div class="tabla-envoltura">
+  <table>
+    <thead><tr><th>Entrega</th><th>Nota</th><th>Corrección (70)</th><th>Claridad (30)</th><th>Qué demuestra</th></tr></thead>
+    <tbody>
+      <tr><td><code>correcta</code></td><td>100</td><td>5/5</td><td>5/5</td><td>El techo existe.</td></tr>
+      <tr><td><code>correcta_ilegible</code></td><td>75</td><td>4,5/5</td><td>2/5</td><td>Funciona y no se entiende: el desglose lo separa.</td></tr>
+      <tr><td><code>mutante</code></td><td>44</td><td>1/5</td><td>5/5</td><td>Código limpio que no cumple el enunciado.</td></tr>
+      <tr><td><code>falla_en_vacia</code></td><td>40</td><td>2/5</td><td>2/5</td><td>El caso borde pesa.</td></tr>
+      <tr><td><code>irrelevante</code></td><td>0</td><td>0/5</td><td>0/5</td><td>No venir al caso no saca nota.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>No se exige un número exacto —un modelo de lenguaje no es determinista y una prueba que pida 82 falla el martes—. Se exige:</p>
+<ul>
+  <li><strong>Invariantes sobre una respuesta real:</strong> la nota es la suma ponderada recalculada en la prueba, cada criterio trae evidencia y los criterios son exactamente los de la rúbrica, en su orden.</li>
+  <li><strong>Bandas amplias:</strong> lo que resuelve el ejercicio no puede sacar 20; lo que no viene al caso no puede sacar 80.</li>
+  <li><strong>El orden entre entregas</strong>, que es lo que de verdad usa un reclutador.</li>
+  <li><strong>Que el desglose discrimine:</strong> si el modelo pusiera la misma nota a todos los criterios, la rúbrica sería un adorno.</li>
+</ul>
+<div class="aviso">
+  <p class="aviso__titulo">Una banda que falla no siempre es un fallo del modelo</p>
+  <p>
+    La primera pregunta es si la banda está mal. Son un juicio del equipo sobre cinco entregas, no
+    una verdad medida. Y si Gemini devuelve 503 o 429, la suite reintenta tres veces y luego falla
+    diciendo que es del proveedor: una saturación de dos minutos no se lee como «la calibración falló».
+  </p>
+</div>
+
+<h2 id="errores">Errores y reintentos</h2>
+<p>
+  Todos los errores usan el mismo formato e incluyen <code>reintentable</code>, que es lo que la cola
+  del backend usa para decidir si vale la pena volver a intentarlo.
+</p>
+<div class="tabla-envoltura">
+  <table>
+    <thead><tr><th>HTTP</th><th>Código</th><th>Reintentable</th><th>Cuándo</th></tr></thead>
+    <tbody>
+      <tr><td>400</td><td><code>VALIDACION</code>, <code>JSON_MAL_FORMADO</code>, <code>RUBRICA_INVALIDA</code></td><td>No</td><td>La petición está mal.</td></tr>
+      <tr><td>401</td><td><code>NO_AUTENTICADO</code></td><td>No</td><td>Falta la clave o no coincide.</td></tr>
+      <tr><td>413</td><td><code>CUERPO_DEMASIADO_GRANDE</code></td><td>No</td><td>Más de 2 MB.</td></tr>
+      <tr><td>422</td><td><code>SOLICITUD_RECHAZADA_POR_PROVEEDOR</code></td><td>No</td><td>Clave inválida, modelo inexistente o contenido bloqueado por los filtros del proveedor.</td></tr>
+      <tr><td>502</td><td><code>SALIDA_INVALIDA</code></td><td><strong>Sí</strong></td><td>El modelo respondió algo que no cumple el contrato.</td></tr>
+      <tr><td>503</td><td><code>PROVEEDOR_NO_DISPONIBLE</code></td><td><strong>Sí</strong></td><td>Caída, sobrecarga, red o tiempo agotado.</td></tr>
+      <tr><td>500</td><td><code>INTERNO</code></td><td>No</td><td>Error no previsto; el detalle queda en el log con la referencia.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 id="aislamiento">Aislamiento y cambio de proveedor</h2>
+<p>
+  El servicio no tiene credenciales ajenas ni forma de consultar datos de otro candidato. El
+  contenedor corre con sistema de ficheros de solo lectura, sin capacidades del kernel, sin escalada
+  de privilegios y con límites de recursos. Cambiar de proveedor es reemplazar el adaptador: el
+  dominio solo conoce la interfaz <code>ProveedorDeModelo</code>, y <code>PROVEEDOR_IA</code> elige
+  cuál se usa. Hay un proveedor simulado para desarrollo y pruebas, que no gasta cuota.
+</p>
+
+<div class="diagrama">
+  <div class="diagrama__cabecera"><span class="punto"></span>Frontera del proveedor</div>
+  <div class="diagrama__lienzo">
+    <div class="mermaid">
+flowchart LR
+  DOM["Dominio<br/>evaluación y validación"] --> IF["ProveedorDeModelo<br/>interfaz"]
+  IF --> GEM["Adaptador Gemini<br/>gemini-3.5-flash"]
+  IF --> SIM["Adaptador simulado<br/>pruebas sin cuota"]
+  GEM --> API["API de Gemini"]
+    </div>
+  </div>
+  <div class="diagrama__pie">El dominio no importa el SDK ni conoce el nombre del modelo. La temperatura y el esquema JSON son parte de la petición, no del adaptador.</div>
+</div>
+
+<h2 id="limites">Límites conocidos</h2>
+<ul>
+  <li><strong>No es determinista de verdad.</strong> Temperatura 0 reduce la varianza; no la elimina. Por eso la calibración usa bandas y orden, no notas exactas.</li>
+  <li><strong>Cinco entregas de referencia no son una muestra.</strong> Miden que la rúbrica discrimina, no que el modelo sea justo con toda la población.</li>
+  <li><strong>No hay medición de sesgo por grupo.</strong> La plataforma no recoge datos demográficos, así que no puede calcular impacto diferencial. Se declara como límite en <a href="leyes.html#ia">Leyes</a>.</li>
+  <li><strong>El texto va a un proveedor externo.</strong> Gemini procesa la entrega en servidores fuera de Colombia; eso exige autorización y aviso de transferencia, que es un punto pendiente de formalización.</li>
+  <li><strong>La calidad depende de la rúbrica.</strong> Un criterio vago produce evidencia vaga. El servicio valida la forma, no la pertinencia pedagógica del criterio.</li>
+</ul>
+      </div>
+      <nav class="paginacion" aria-label="Navegación entre páginas">
+        <a href="backend.html"><span>← Anterior</span><strong>Backend</strong></a>
+        <a class="paginacion__siguiente" href="rag.html"><span>Siguiente →</span><strong>Mentor RAG</strong></a>
+      </nav>
+    </main>
+    <aside id="sitio-toc" aria-label="Contenido de la página"></aside>
+  </div>
+  <div id="sitio-pie"></div>
+  <noscript>
+    <div style="max-width:900px;margin:0 auto;padding:24px">
+      <p><strong>La navegación lateral necesita JavaScript.</strong> Estas son las secciones:</p>
+      <ul>
+        <li><a href="index.html">MeritIA · Documentación</a></li>
+        <li><a href="arquitectura.html">Arquitectura</a></li>
+        <li><a href="frontend.html">Frontend</a></li>
+        <li><a href="backend.html">Backend</a></li>
+        <li><a href="ia.html">Servicio de IA</a></li>
+        <li><a href="rag.html">Mentor RAG</a></li>
+        <li><a href="leyes.html">Leyes y privacidad</a></li>
+        <li><a href="requisitos.html">Requisitos</a></li>
+        <li><a href="operacion.html">Operación</a></li>
+        <li><a href="decisiones.html">Decisiones de arquitectura</a></li>
+        <li><a href="estado.html">Estado del proyecto</a></li>
+      </ul>
+    </div>
+  </noscript>
+  <script src="assets/js/mermaid.min.js" defer></script>
+  <script src="assets/js/site.js" defer></script>
+</body>
+</html>
