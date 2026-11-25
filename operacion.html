@@ -40,30 +40,29 @@
       <div class="prosa">
 <header class="cabecera-pagina">
   <span class="ceja">Operación</span>
-  <h1>El sistema no está desplegado, y la página empieza por decirlo.</h1>
+  <h1>La aplicación ya está desplegada; ahora toca operar lo que está en línea.</h1>
   <p class="entradilla">
-    Hay pipeline, imágenes, un <code>compose</code> de producción, health checks y un plan de escalado
-    con disparadores medidos. Lo que no hay todavía es un servidor encendido: el paso de despliegue
-    existe y falla a propósito hasta que se elija proveedor. Esta página separa lo que está listo de
-    lo que falta para que nadie confunda «pasa la CI» con «está en producción».
+    El frontend está publicado en Vercel y la API en Azure Container Apps. Vercel reescribe las
+    llamadas <code>/api/*</code> hacia el backend; el endpoint de salud de la API responde por HTTPS.
+    Esta página describe el despliegue que ya existe y separa ese hecho de los controles operativos
+    que todavía deben verificarse.
   </p>
   <div class="metas">
     <span class="meta">GitHub Actions</span>
-    <span class="meta">Docker + Caddy</span>
-    <span class="meta meta--acento">Despliegue desactivado</span>
-    <span class="meta">Un solo servidor</span>
+    <span class="meta">Vercel + Azure Container Apps</span>
+    <span class="meta meta--acento">Desplegado</span>
+    <span class="meta">Web + API</span>
   </div>
 </header>
 
-<div class="aviso aviso--peligro">
-  <p class="aviso__titulo">Estado real, sin adornos</p>
+<div class="aviso aviso--ok">
+  <p class="aviso__titulo">Despliegues confirmados</p>
   <p>
-    El backend publica una imagen en GHCR cuando la integración continua termina en verde. Esa imagen
-    <strong>no se despliega en ningún sitio</strong>: el trabajo de despliegue está detrás de
-    <code>DESPLIEGUE_HABILITADO</code> y, mientras valga otra cosa que <code>true</code>, no se
-    ejecuta. El frontend tampoco tiene despliegue automático y, además, su constante de API sigue
-    apuntando a <code>localhost</code>, lo que impediría usarlo desde otro origen. No hay entorno
-    público de producción.
+    La web está desplegada en Vercel. El backend está en Azure Container Apps y
+    <code>GET /api/salud</code> responde <code>estado: vivo</code>. El frontend usa la ruta relativa
+    <code>/api/v1</code> y Vercel reescribe <code>/api/*</code> al backend. El repositorio conserva
+    además el gate <code>DESPLIEGUE_HABILITADO</code> para el pipeline automatizado: ese gate controla
+    futuras ejecuciones de CI, no invalida los despliegues ya realizados.
   </p>
 </div>
 
@@ -83,19 +82,19 @@ flowchart LR
   P --> D["Dependencias<br/>npm audit · críticas"]
   P --> L["Lint y build<br/>OpenAPI --check"]
   P --> T["Pruebas<br/>unitarias + integración"]
-  S --> A{"¿Todo verde<br/>en main?"}
-  D --> A
-  L --> A
-  T --> A
+  S --> G{"¿Todo verde<br/>en main?"}
+  D --> G
+  L --> G
+  T --> G
   T --> Q["SonarQube<br/>quality gate"]
-  Q --> A
-  A -->|"no"| X["Sin imagen"]
-  A -->|"sí"| I["Imagen GHCR<br/>SHA completo + main"]
+  Q --> G
+  G -->|"no"| X["Sin imagen"]
+  G -->|"sí"| I["Imagen GHCR<br/>SHA completo + main"]
   I --> E{"DESPLIEGUE<br/>HABILITADO"}
-  E -->|"false"| N["No se despliega<br/>y main no se pone rojo"]
-  E -->|"true"| H["SSH al servidor<br/>migraciones + compose"]
-  H --> V["GET /api/salud<br/>hasta 5 minutos"]
-  V -->|"no responde 200"| F["Despliegue falla"]
+  E -->|"true"| H["Flujo automático<br/>por ambiente"]
+  E -->|"false"| N["El despliegue actual<br/>sigue en línea"]
+  FRONT["Vercel<br/>frontend"] -->|"rewrite /api/*"| AZURE["Azure Container Apps<br/>backend"]
+  AZURE --> HEALTH["GET /api/salud<br/>estado: vivo"]
     </div>
   </div>
   <div class="diagrama__pie">Las acciones de GitHub van fijadas por SHA, no por etiqueta: una etiqueta se puede mover a código malicioso. Dependabot mantiene esos SHA al día.</div>
@@ -111,7 +110,7 @@ flowchart LR
       <tr><td>Pruebas y cobertura</td><td>Una prueba falla o la cobertura baja del umbral</td><td>80 % en sentencias, líneas y funciones; 70 % en ramas. Medido hoy: 89,6 % y 77 %.</td></tr>
       <tr><td>Análisis estático</td><td>La <em>quality gate</em> de SonarQube no pasa</td><td>Si no está configurado, avisa y no bloquea.</td></tr>
       <tr><td>Artefacto</td><td>—</td><td>Solo en push a <code>main</code> con todo lo anterior en verde. Etiqueta con el SHA completo y con <code>main</code>.</td></tr>
-      <tr><td>Despliegue</td><td>Falta un secreto del ambiente o el health check no responde</td><td>Hoy no se ejecuta. Está desactivado a propósito.</td></tr>
+      <tr><td>Despliegue</td><td>Falta un secreto del ambiente o falla el health check</td><td>El frontend y la API ya están desplegados; el gate del pipeline controla los siguientes despliegues automáticos.</td></tr>
     </tbody>
   </table>
 </div>
@@ -126,47 +125,43 @@ flowchart LR
   es justo lo que el criterio prohíbe.
 </p>
 
-<h2 id="despliegue">Qué haría un despliegue</h2>
+<h2 id="despliegue">Topología desplegada</h2>
 <ol class="pasos">
-  <li><h3>Comprobar los secretos del ambiente</h3><p>Si falta uno de los diez, falla diciendo cuál. No arranca a medias.</p></li>
-  <li><h3>Copiar la configuración desde el repositorio</h3><p><code>compose.produccion.yaml</code> y el <code>Caddyfile</code> salen de <code>main</code>, no de lo que alguien editó a mano en el servidor hace tres semanas.</p></li>
-  <li><h3>Escribir el <code>.env</code> en el servidor</h3><p>Por la tubería de SSH y con <code>umask 077</code>. Nunca toca el disco del runner.</p></li>
-  <li><h3>Bajar la imagen por digest</h3><p><code>ghcr.io/…@sha256:…</code>. Un digest no puede cambiar entre la construcción y el despliegue; una etiqueta sí.</p></li>
-  <li><h3>Correr las migraciones antes de levantar</h3><p>Un contenedor nuevo contra un esquema viejo no falla al arrancar: falla en la primera consulta de un usuario.</p></li>
-  <li><h3>Levantar con compose</h3><p>PostgreSQL, Redis, almacenamiento, backend y proxy. Las bases no publican puertos.</p></li>
-  <li><h3>Esperar el health check</h3><p><code>GET /api/salud</code> hasta cinco minutos. Un <code>up -d</code> que devuelve cero no significa que la aplicación funcione.</p></li>
+  <li><h3>Frontend publicado en Vercel</h3><p>El build de producción usa <code>/api/v1</code> como base, relativa al mismo origen.</p></li>
+  <li><h3>Proxy de API configurado</h3><p><code>vercel.json</code> reescribe <code>/api/:path*</code> hacia el backend, evitando que el navegador dependa de <code>localhost</code>.</p></li>
+  <li><h3>Backend en Azure Container Apps</h3><p>La API está disponible por HTTPS y su endpoint público de salud responde <code>estado: vivo</code>.</p></li>
+  <li><h3>CI y despliegues posteriores</h3><p>La CI genera la imagen del backend y el flujo de despliegue por ambiente conserva <code>DESPLIEGUE_HABILITADO</code>. Verifica esa variable y los secretos antes de esperar despliegues automáticos tras cada push.</p></li>
 </ol>
 
 <div class="rejilla rejilla--2">
   <div class="tarjeta">
-    <h3>Hace falta un dominio, y no es preferencia</h3>
-    <p>La cookie de sesión se emite con <code>Secure</code> en producción. Sobre HTTP plano el navegador la descarta sin avisar: el login responde 200 y la siguiente petición va sin sesión. Se vería como un bucle de vuelta a «Entrar», con los registros limpios. Let's Encrypt no emite certificados para una IP, así que hace falta un dominio o un subdominio de DuckDNS.</p>
+    <h3>HTTPS ya está en uso</h3>
+    <p>El endpoint desplegado de Azure responde por HTTPS. La cookie de sesión lleva <code>Secure</code> en producción; conservar TLS es requisito para que el navegador la envíe.</p>
   </div>
   <div class="tarjeta">
     <h3>Frontend y API en el mismo origen</h3>
-    <p>La cookie va con <code>SameSite=strict</code>. Un frontend en otro dominio no la enviaría nunca. Caddy sirve <code>/srv/web</code> en <code>/</code> y hace de proxy del backend en <code>/api</code>; la constante <code>API</code> del front tendría que pasar a <code>/api/v1</code>. Hoy sigue en <code>http://localhost:3000/api/v1</code>: es lo que impide desplegar el front.</p>
+    <p>La cookie va con <code>SameSite=strict</code>. El frontend sirve la API desde el mismo origen con <code>/api/v1</code>, y Vercel reescribe <code>/api/*</code> al backend de Azure. Esta configuración evita depender de CORS para el flujo web.</p>
   </div>
 </div>
 
-<h2 id="topologia">La topología prevista</h2>
+<h2 id="topologia">La topología desplegada</h2>
 <div class="diagrama diagrama--ancho">
-  <div class="diagrama__cabecera"><span class="punto"></span>Un servidor, cinco contenedores</div>
+  <div class="diagrama__cabecera"><span class="punto"></span>Vercel y Azure Container Apps</div>
   <div class="diagrama__lienzo">
     <div class="mermaid">
 flowchart TB
-  U["Navegador<br/>HTTPS"] --> C["Caddy<br/>TLS · :443"]
-  C -->|"/"| W["Frontend estático<br/>/srv/web"]
-  C -->|"/api"| B["Backend<br/>NestJS · no-root"]
-  B --> PG[("PostgreSQL 17<br/>sin puerto publicado")]
-  B --> RD[("Redis 8.2<br/>sin puerto publicado")]
-  B --> S3["Almacenamiento S3<br/>sin puerto publicado"]
-  B -->|"HTTP + clave"| IA["ai-service"]
-  B -->|"HTTP + clave"| RAG["rag-service"]
+  U["Navegador<br/>HTTPS"] --> V["Vercel<br/>Frontend Angular"]
+  V -->|"/api/* rewrite"| B["Azure Container Apps<br/>Backend NestJS"]
+  B --> PG[("PostgreSQL")]
+  B --> RD[("Redis / BullMQ")]
+  B --> S3["Almacenamiento S3"]
+  B -->|"servicio IA"| IA["ai-service"]
+  B -->|"mentor"| RAG["rag-service"]
   IA --> G["Gemini"]
   RAG --> G
     </div>
   </div>
-  <div class="diagrama__pie">Solo 22, 80 y 443 abiertos. El cortafuegos es el segundo cerrojo; el primero es que el compose de producción no publica los puertos de las bases.</div>
+  <div class="diagrama__pie">La SPA y la API están desplegadas en proveedores distintos; Vercel mantiene las llamadas web bajo la ruta relativa <code>/api</code>.</div>
 </div>
 
 <h2 id="salud">Salud: dos preguntas distintas</h2>
@@ -183,6 +178,17 @@ flowchart TB
       <tr><td><code>GET /api/salud/listo</code></td><td>Comprueba base, almacenamiento, cola y servicio de IA en paralelo, con 3 s máximo cada una. 200 si todo está en pie o solo falla algo no crítico; 503 si cae una crítica.</td><td>El balanceador, cuando exista, para decidir si manda tráfico.</td></tr>
     </tbody>
   </table>
+</div>
+<div class="aviso aviso--aviso">
+  <p class="aviso__titulo">API disponible; servicio de evaluación degradado</p>
+  <p>
+    En la comprobación del <time datetime="2026-11-25">25 de noviembre de 2026</time>,
+    <code>GET /api/salud</code> respondió <code>vivo</code>, mientras que
+    <code>GET /api/salud/listo</code> devolvió <code>degradado</code>: base de datos, almacenamiento
+    y cola estaban <code>ok</code>; <code>servicio_ia</code> agotó el tiempo de espera (~2 s). El
+    backend sigue recibiendo trabajo, pero las nuevas evaluaciones pueden esperar a que el proveedor
+    responda. «Desplegado» no significa que todas las dependencias estén sanas.
+  </p>
 </div>
 <div class="aviso">
   <p class="aviso__titulo">Sin IA se sigue trabajando</p>
@@ -234,16 +240,17 @@ flowchart TB
 
 <h2 id="respaldo">Respaldos y recuperación</h2>
 <div class="aviso aviso--peligro">
-  <p class="aviso__titulo">No hay copias de seguridad</p>
+  <p class="aviso__titulo">Respaldos por verificar</p>
   <p>
-    Los volúmenes viven en el servidor. Si se pierde la máquina, se pierden los datos. No hay
-    <code>pg_dump</code> programado, ni retención, ni una restauración probada. Es una deuda declarada
-    que hay que cerrar antes de recibir datos de personas reales, no después.
+    El despliegue está activo, pero la documentación del repositorio no acredita una política de
+    respaldo y restauración para el entorno Azure. Hay que confirmar la configuración real del
+    proveedor y registrar una prueba de recuperación; no se debe inferir que existe respaldo solo
+    porque la aplicación está en línea.
   </p>
 </div>
 <p>Lo que tampoco hay, dicho en voz alta:</p>
 <ul>
-  <li><strong>Alta disponibilidad.</strong> Un solo servidor, sin balanceo. Si se cae, se cayó. Para un MVP es una decisión; para producción, un riesgo.</li>
+  <li><strong>Alta disponibilidad.</strong> No está documentada ni verificada. El despliegue no equivale por sí solo a redundancia o recuperación automática.</li>
   <li><strong>Vuelta atrás automática.</strong> Si el health check falla, la versión nueva ya está arriba y rota. Volver es desplegar el commit anterior.</li>
   <li><strong>Migraciones reversibles en el despliegue.</strong> Tienen su <code>down</code>, pero el despliegue no lo ejecuta: deshacer una migración con datos encima es una decisión humana.</li>
   <li><strong>Rotación de la clave de cifrado.</strong> Cambiar <code>ENCRYPTION_KEY</code> hoy exige un procedimiento manual no documentado.</li>
@@ -257,10 +264,10 @@ flowchart TB
       <tr><td>503 con <code>Retry-After</code></td><td>Peticiones en vuelo y CPU del proceso</td><td>Es el control de admisión haciendo su trabajo. Si es sostenido, aplicar etapa 1; no subir el límite sin medir.</td></tr>
       <tr><td>502 o 503 en evaluaciones</td><td><code>GET /evaluaciones/cola</code> y <code>/api/salud/listo</code></td><td>Si el proveedor de IA está caído, la cola reintenta según <code>reintentable</code>. Las entregas no se rechazan.</td></tr>
       <tr><td>Entregas que quedan «en evaluación»</td><td>Worker y Redis</td><td>Comprobar <code>COLA_WORKER_HABILITADO</code> en el proceso que debería consumir. Reencolar es seguro: el id del trabajo es el de la entrega.</td></tr>
-      <tr><td>Login que «funciona» y vuelve a la pantalla de entrar</td><td>Esquema de la URL y cabecera <code>Set-Cookie</code></td><td>Falta TLS o el frontend está en otro origen. La cookie <code>Secure</code> y <code>SameSite=strict</code> se descarta en silencio.</td></tr>
+      <tr><td>Login que «funciona» y vuelve a la pantalla de entrar</td><td>Esquema de la URL y cabecera <code>Set-Cookie</code></td><td>Verificar HTTPS, el proxy <code>/api</code> y el origen del frontend. La cookie <code>Secure</code> y <code>SameSite=strict</code> se descarta en silencio si la configuración no coincide.</td></tr>
       <tr><td>El despliegue falla en el health check</td><td>Logs del contenedor y migraciones</td><td>La versión nueva ya está arriba. Desplegar el commit anterior; no reiniciar a ciegas.</td></tr>
-      <tr><td>Disco lleno</td><td>Volumen de PostgreSQL, almacenamiento y logs</td><td>Las entregas y las fotos crecen sin límite global. No hay purga de entregas: es una deuda de retención.</td></tr>
-      <tr><td>Certificado vencido</td><td>Caddy y renovación de Let's Encrypt</td><td>Renovar el dominio. Sin TLS válido, el login deja de funcionar por la cookie <code>Secure</code>.</td></tr>
+      <tr><td>Almacenamiento lleno</td><td>Cuotas del proveedor, base, bucket y logs</td><td>Las entregas y las fotos crecen sin límite global. No hay purga de entregas: es una deuda de retención.</td></tr>
+      <tr><td>Certificado o dominio no disponible</td><td>Estado TLS del frontend y de la API</td><td>Restaurar HTTPS: el login depende de la cookie <code>Secure</code>.</td></tr>
     </tbody>
   </table>
 </div>
@@ -287,14 +294,12 @@ flowchart TB
   </table>
 </div>
 
-<h2 id="checklist">Antes de llamarlo producción</h2>
+<h2 id="checklist">Siguientes tareas de operación</h2>
 <ol class="pasos">
-  <li><h3>Elegir proveedor e implementar el paso de despliegue</h3><p>Mientras el paso no exista, activar la variable solo deja <code>main</code> en rojo en cada commit.</p></li>
-  <li><h3>Dominio y TLS</h3><p>Sin HTTPS la cookie de sesión no viaja. Es un bloqueante, no una mejora.</p></li>
-  <li><h3>Cambiar la constante de API del frontend</h3><p>De <code>http://localhost:3000/api/v1</code> a <code>/api/v1</code>, y servir el build desde Caddy en el mismo origen.</p></li>
-  <li><h3>Respaldos con restauración probada</h3><p>Programar <code>pg_dump</code>, retención y una prueba de restauración registrada.</p></li>
+  <li><h3>Respaldos y restauración probada</h3><p>Confirmar la política del entorno desplegado, su retención y una restauración que se haya ejecutado de verdad.</p></li>
+  <li><h3>Monitoreo externo</h3><p>Vigilar frontend, API, latencia y errores desde fuera de Vercel y Azure.</p></li>
   <li><h3>Retención de entregas, evaluaciones y fotos</h3><p>La foto biométrica tiene 90 días y un temporizador que la borra. Los archivos y las notas no tienen plazo definido.</p></li>
-  <li><h3>Política de tratamiento, PQRS y transferencia internacional</h3><p>Ver <a href="leyes.html#pendientes">Leyes</a>: sin canal y sin contrato de transmisión, el cumplimiento no se sostiene.</p></li>
+  <li><h3>Política de tratamiento, PQRS y transferencia internacional</h3><p>Ver <a href="leyes.html#pendientes">Leyes</a>: faltan el canal formal y el contrato de transmisión.</p></li>
   <li><h3>Re-medir el punto de caída y hacer el soak</h3><p>El 503 existe; el número que lo dimensiona sigue esperando la medición con el control puesto.</p></li>
   <li><h3>Rotación de claves y plan de incidentes</h3><p>Procedimiento, responsables y plazos de notificación a la SIC y a los titulares.</p></li>
 </ol>
@@ -305,8 +310,8 @@ flowchart TB
     Un push a <code>main</code> con todo en verde produce una imagen inmutable, identificada por
     digest, construida con un Node fijado y probada contra las mismas versiones de PostgreSQL, Redis y
     almacenamiento del entorno local. El pipeline falla ante un secreto, una vulnerabilidad crítica o
-    una prueba roja. El despliegue no se ha inventado: está escrito, es auditable y está apagado a
-    propósito.
+    una prueba roja. Los despliegues de frontend y API ya están hechos; los controles de recuperación,
+    monitorización externa y continuidad siguen siendo tareas operativas.
   </p>
 </div>
       </div>

@@ -170,7 +170,7 @@
     destino.setAttribute('aria-label', 'Navegación de la documentación');
     destino.innerHTML = `${grupos}
       <div class="lateral__pie">
-        <span class="insignia insignia--ok">v1.0</span>
+        <span class="insignia insignia--ok">v1.1</span>
         <p style="margin:8px 0 0">Estado del código: noviembre de 2026.</p>
         <p style="margin:6px 0 0"><a href="https://github.com/MeritIA" target="_blank" rel="noopener">Organización MeritIA</a></p>
       </div>`;

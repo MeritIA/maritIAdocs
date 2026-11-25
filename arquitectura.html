@@ -259,37 +259,43 @@ flowchart TD
   </table>
 </div>
 
-<h2 id="despliegue">Despliegue previsto</h2>
+<h2 id="despliegue">Despliegue realizado</h2>
 <p>
-  La CI construye y publica la imagen del backend en GHCR etiquetada por SHA. El despliegue a un
-  VPS con Docker Compose está escrito, pero <strong>desactivado a propósito</strong> mientras el
-  proyecto no elija proveedor de nube: el paso falla si se activa la variable sin implementarlo, para
-  no dar un verde que no desplegó nada. No hay hoy un entorno público de producción.
+  La aplicación ya está desplegada: el frontend usa Vercel y su regla de reescritura envía <code>/api/*</code>
+  al backend publicado en Azure Container Apps. La API responde en HTTPS en
+  <a href="https://meritia-backend.purpleglacier-76ab2c43.chilecentral.azurecontainerapps.io/api/salud">su endpoint de salud</a>.
+  El workflow de CI conserva <code>DESPLIEGUE_HABILITADO</code> como gate para despliegues automáticos
+  por ambiente; eso no significa que la aplicación siga sin desplegar.
 </p>
 
 <div class="diagrama">
-  <div class="diagrama__cabecera"><span class="punto"></span>De la confirmación al servidor</div>
+  <div class="diagrama__cabecera"><span class="punto"></span>CI y despliegue actual</div>
   <div class="diagrama__lienzo">
     <div class="mermaid">
 flowchart LR
   GIT["push a main"] --> CI["GitHub Actions<br/>Gitleaks · audit · lint<br/>pruebas · SonarQube"]
   CI -->|"todo en verde"| IMG["ghcr.io/meritia/backend<br/>etiqueta por SHA"]
-  IMG -.->|"despliegue desactivado<br/>hasta elegir proveedor"| CADDY
+  IMG --> API
 
-  subgraph VPS["VPS Ubuntu 24.04 · Docker Compose"]
-    CADDY["Caddy<br/>:80 / :443 · TLS"]
-    API["backend<br/>una o N copias"]
+  subgraph CLOUD["Despliegue actual"]
+    VERCEL["Frontend<br/>Vercel"]
+    REWRITE["Rewrite /api/*"]
+    API["Backend<br/>Azure Container Apps"]
+    VERCEL --> REWRITE
+    REWRITE --> API
+  end
+
+  subgraph DATOS["Servicios de datos del backend"]
     PG[("PostgreSQL 17.6")]
     RDS[("Redis 8.2")]
     SW[("SeaweedFS 4.48")]
-    CADDY --> API
     API --> PG
     API --> RDS
     API --> SW
   end
     </div>
   </div>
-  <div class="diagrama__pie">El compose de producción no publica los puertos de las bases: solo 22, 80 y 443 están abiertos. El detalle está en <a href="operacion.html">Operación</a>.</div>
+  <div class="diagrama__pie">Vercel sirve la SPA y reescribe las llamadas de API hacia Azure Container Apps. La topología desplegada separa la publicación web del backend; el detalle está en <a href="operacion.html">Operación</a>.</div>
 </div>
 
 <h2 id="limites">Límites de esta arquitectura</h2>
@@ -298,8 +304,8 @@ flowchart LR
   <p>
     Un monolito modular sigue siendo un solo proceso: un fallo de memoria o un bucle infinito tumba
     todas las capacidades a la vez. La separación de los servicios de IA mitiga la parte más lenta,
-    pero no la disponibilidad del núcleo. Tampoco hay hoy un entorno desplegado, ni <em>soak</em> de
-    horas que descarte fugas de memoria, ni rotación de la clave de cifrado.
+    pero no la disponibilidad del núcleo. El despliegue ya está realizado; siguen pendientes el
+    <em>soak</em> de horas que descarte fugas de memoria y la rotación de la clave de cifrado.
   </p>
 </div>
 <ul>

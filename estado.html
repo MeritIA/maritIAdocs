@@ -48,10 +48,10 @@
     «pendiente» no se adorna.
   </p>
   <div class="metas">
-    <span class="meta">Corte: 24 de noviembre de 2026</span>
+    <span class="meta">Corte: 25 de noviembre de 2026</span>
     <span class="meta meta--acento">76 RF implementados</span>
     <span class="meta">83 operaciones</span>
-    <span class="meta">Despliegue: no</span>
+    <span class="meta meta--acento">Frontend y API desplegados</span>
   </div>
 </header>
 
@@ -60,7 +60,7 @@
   <div class="cifra"><span class="cifra__valor">586</span><span class="cifra__etiqueta">pruebas del backend<br>en CI</span></div>
   <div class="cifra"><span class="cifra__valor">81</span><span class="cifra__etiqueta">pruebas del<br>servicio de IA</span></div>
   <div class="cifra"><span class="cifra__valor">24</span><span class="cifra__etiqueta">pruebas del<br>mentor RAG</span></div>
-  <div class="cifra"><span class="cifra__valor">0</span><span class="cifra__etiqueta">entornos<br>desplegados</span></div>
+  <div class="cifra"><span class="cifra__valor">2</span><span class="cifra__etiqueta">capas publicadas<br>web + API</span></div>
 </div>
 
 <h2 id="tabla">Los cinco componentes, en una tabla</h2>
@@ -72,15 +72,15 @@
         <td><strong>Backend</strong></td>
         <td>NestJS 12, 8 módulos, PostgreSQL 17, Redis, S3</td>
         <td>Registro, sesión, vacantes, ejercicios, entregas, evaluación asíncrona, reportes, moderación, consentimientos, avisos</td>
-        <td>Despliegue, respaldos, extracción de PDF/DOCX, re-medición de capacidad</td>
-        <td><span class="insignia insignia--ok">implementado, sin desplegar</span></td>
+        <td>Respaldos, extracción de PDF/DOCX, re-medición de capacidad</td>
+        <td><span class="insignia insignia--ok">desplegado · Azure</span></td>
       </tr>
       <tr>
         <td><strong>Frontend</strong></td>
         <td>Angular 21.2, sin zonas, 33 rutas, una app para web y Android</td>
         <td>Flujos de candidato, empresa, moderación y administración; diseño con tokens; APK de depuración construible</td>
-        <td>Cambiar la constante de API a mismo origen, auditoría de accesibilidad, más pruebas</td>
-        <td><span class="insignia insignia--parcial">funcional, no desplegado</span></td>
+        <td>Auditoría de accesibilidad y más pruebas</td>
+        <td><span class="insignia insignia--ok">desplegado · Vercel</span></td>
       </tr>
       <tr>
         <td><strong>Servicio de IA</strong></td>
@@ -98,22 +98,22 @@
       </tr>
       <tr>
         <td><strong>Infraestructura</strong></td>
-        <td>GitHub Actions, GHCR, compose de producción, Caddy</td>
-        <td>CI de cinco verificaciones, imagen inmutable por digest, entorno local con un comando</td>
-        <td>Servidor, dominio, TLS, respaldos, monitoreo externo, plan de incidentes</td>
-        <td><span class="insignia insignia--pendiente">no desplegado</span></td>
+        <td>GitHub Actions, GHCR, Vercel y Azure Container Apps</td>
+        <td>Frontend publicado; API desplegada y respondiendo en HTTPS; <code>/api/*</code> se reescribe al backend</td>
+        <td>Respaldos, monitoreo externo, plan de incidentes y verificar el gate de despliegue automático</td>
+        <td><span class="insignia insignia--ok">desplegado</span></td>
       </tr>
     </tbody>
   </table>
 </div>
 
 <h2 id="funciona">El recorrido que sí se sostiene</h2>
-<p>
-  El flujo central del producto está construido de punta a punta en el código: una empresa crea una
-  vacante con ejercicios, invita o recibe postulaciones, el candidato consiente, entrega, la IA
-  califica, el reclutador lee un ranking con alias y decide. Lo que no existe es el servidor donde
-  eso ocurre para personas reales.
-</p>
+  <p>
+    El flujo central del producto está construido y sus capas web y API ya están desplegadas: una empresa crea una
+    vacante con ejercicios, invita o recibe postulaciones, el candidato consiente, entrega, la IA
+    califica, el reclutador lee un ranking con alias y decide. El frontend se sirve desde Vercel y las
+    llamadas de API llegan al backend de Azure Container Apps.
+  </p>
 <div class="diagrama diagrama--ancho">
   <div class="diagrama__cabecera"><span class="punto"></span>Estado del flujo principal</div>
   <div class="diagrama__lienzo">
@@ -153,7 +153,7 @@ flowchart LR
       <li>Que un respaldo se restaure: no hay respaldos.</li>
       <li>Que la IA sea justa entre grupos: no se recogen datos demográficos.</li>
       <li>Que la interfaz cumpla WCAG 2.1 AA: no hay auditoría.</li>
-      <li>Que el conjunto funcione en un servidor: no hay servidor.</li>
+      <li>Que la capacidad medida en local se mantenga igual bajo carga en el entorno desplegado.</li>
     </ul>
   </div>
 </div>
@@ -166,12 +166,13 @@ flowchart LR
       <tr><td>Extracción de archivos</td><td>ZIP, Markdown, TXT, IPYNB, SQL y texto plano se leen</td><td>PDF sin capa de texto y DOCX</td><td>La entrega queda fallida con motivo y no consume intento. No se califica.</td></tr>
       <tr><td>Pruebas</td><td>Unitarias, integración, seguridad y concurrencia en backend; unitarias en IA y RAG</td><td>E2E del flujo completo; más pruebas de frontend (13 hoy)</td><td>Una regresión entre módulos puede pasar la CI.</td></tr>
       <tr><td>Rendimiento</td><td>Barrido de carga con k6 y cifras reproducibles</td><td>Re-medición con admisión, recuperación tras pico y <em>soak</em></td><td>Se sabe dónde cae, no cuánto tarda en volver.</td></tr>
-      <tr><td>Despliegue</td><td>Pipeline, imagen, compose y health checks</td><td>Servidor, dominio, TLS, activar el paso y cambiar la API del front</td><td>Nada está en producción.</td></tr>
+      <tr><td>Despliegue</td><td>Frontend publicado en Vercel; backend desplegado en Azure Container Apps; API de salud responde por HTTPS</td><td>Respaldos, observabilidad externa y confirmar el gate de despliegue automático</td><td>Los despliegues iniciales ya están hechos; faltan controles operativos.</td></tr>
       <tr><td>Derechos del titular</td><td>Acceso, supresión y revocación</td><td>Rectificación de perfil y canal de PQRS</td><td>Corregir nombre o correo exige soporte; no hay plazo formal de respuesta.</td></tr>
       <tr><td>Cumplimiento</td><td>Consentimiento granular, cifrado, auditoría y minimización</td><td>Política publicada, aviso de transferencia, RNBD, evaluación de impacto y plan de incidentes</td><td>Las obligaciones centrales tienen código; las documentales, no.</td></tr>
       <tr><td>Accesibilidad</td><td>Criterios de diseño alineados con WCAG 2.1 AA</td><td>Auditoría con herramientas y personas</td><td>Es un objetivo, no una certificación.</td></tr>
       <tr><td>Pagos</td><td>Pantalla de saldo, métodos y retiro</td><td>Pasarela real, conciliación y obligaciones financieras</td><td>Todo movimiento es simulado y así se etiqueta en la interfaz.</td></tr>
       <tr><td>Operación</td><td>Log estructurado, alertas por patrón, salud de dependencias</td><td>Respaldos, rotación de claves, trazas y monitoreo externo</td><td>Un fallo del servidor no tiene recuperación probada.</td></tr>
+      <tr><td>Disponibilidad de IA</td><td>La API del backend está desplegada y responde.</td><td>El último readiness check agotó el tiempo de espera del servicio de IA; el estado RAG no se midió.</td><td>El backend está en línea, pero la evaluación está degradada; revisar URL, conectividad y credenciales del servicio.</td></tr>
     </tbody>
   </table>
 </div>
@@ -179,7 +180,7 @@ flowchart LR
 <h2 id="no-existe">Lo que no existe</h2>
 <ul>
   <li><strong>Pasarela de pagos.</strong> El saldo y los retiros son una simulación de producto, no dinero. No hay conciliación ni obligaciones de pasarela activadas.</li>
-  <li><strong>Alta disponibilidad.</strong> Un servidor previsto, sin balanceo. Si se cae, se cayó. Kubernetes no tiene escala que lo justifique.</li>
+  <li><strong>Alta disponibilidad.</strong> No está documentada ni verificada. El despliegue no equivale por sí solo a redundancia o recuperación automática.</li>
   <li><strong>Proctoring completo.</strong> Hay verificación con cámara o modalidad alterna; no hay sesión cronometrada del lado del servidor ni detección de fraude en vivo.</li>
   <li><strong>Analítica avanzada y métricas por grupo.</strong> Exigirían recoger datos que el producto decidió no recoger. La métrica de equidad no existe y se declara.</li>
   <li><strong>Entrenamiento con entregas.</strong> No se usan para entrenar modelos. Hacerlo exigiría una finalidad nueva y consentimiento separado.</li>
@@ -234,11 +235,9 @@ flowchart LR
 
 <h2 id="riesgos">Los riesgos, ordenados por lo que duele</h2>
 <ol class="pasos">
-  <li><h3>No hay entorno desplegado</h3><p>Todo lo demás es secundario frente a esto. Sin servidor no hay usuarios, no hay datos reales y no se puede validar la operación. Es el bloqueante número uno.</p></li>
-  <li><h3>No hay respaldos</h3><p>Un servidor sin copias convierte un fallo de disco en la pérdida de todas las entregas, notas y consentimientos. Antes de recibir datos de personas, hace falta <code>pg_dump</code> programado y una restauración probada.</p></li>
+  <li><h3>Respaldos y recuperación no verificados</h3><p>El despliegue está activo, pero no hay evidencia documentada de respaldos restaurables. Confirmar política de retención y hacer una prueba de restauración.</p></li>
   <li><h3>La transferencia internacional a Gemini no está formalizada</h3><p>El texto de la entrega sale del país. La Ley 1581 exige informar destinatario y finalidad; no hay contrato de transmisión ni autorización específica.</p></li>
   <li><h3>Falta el E2E del flujo completo</h3><p>La suite es amplia por módulo, pero nadie prueba el recorrido entero de una vez. Una regresión entre módulos puede pasar en verde.</p></li>
-  <li><h3>El frontend no apunta al mismo origen</h3><p>Dos líneas separan el build de un despliegue posible. Con <code>SameSite=strict</code>, un frontend en otro dominio no envía la cookie.</p></li>
   <li><h3>La retención de entregas y notas no tiene plazo</h3><p>La foto biométrica se borra a los 90 días; los archivos y las evaluaciones se quedan indefinidamente. Es una obligación de minimización pendiente.</p></li>
   <li><h3>La calidad de la IA no está medida por población</h3><p>Cinco entregas de referencia demuestran que la rúbrica discrimina, no que el modelo sea justo. Sin datos demográficos no se puede medir impacto diferencial, y no recogerlos es una decisión con costo.</p></li>
   <li><h3>La accesibilidad es un objetivo, no una verificación</h3><p>Hay criterios y buenas prácticas; no hay auditoría. Afirmar cumplimiento sin ella sería una afirmación sin evidencia.</p></li>
@@ -249,13 +248,12 @@ flowchart LR
   <table>
     <thead><tr><th>Prioridad</th><th>Trabajo</th><th>Por qué</th><th>Esfuerzo</th></tr></thead>
     <tbody>
-      <tr><td>1</td><td>Desplegar backend y frontend en un VPS con dominio y TLS</td><td>Sin esto no hay producto, solo un repositorio.</td><td>Medio</td></tr>
-      <tr><td>2</td><td>Respaldos programados y una restauración de prueba</td><td>Es la diferencia entre un incidente y una pérdida.</td><td>Bajo</td></tr>
-      <tr><td>3</td><td>Cambiar la API del front a <code>/api/v1</code> y servir el build desde Caddy</td><td>Desbloquea el frontend en producción.</td><td>Muy bajo</td></tr>
-      <tr><td>4</td><td>E2E del recorrido registro → entrega → nota → ranking</td><td>Cierra el hueco declarado del RNF-CAL-3.</td><td>Medio</td></tr>
-      <tr><td>5</td><td>Política de tratamiento, aviso y canal de PQRS</td><td>Obligaciones de la Ley 1581 sin las cuales no se pueden recibir datos reales.</td><td>Medio, jurídico</td></tr>
-      <tr><td>6</td><td>Re-medir capacidad con admisión y hacer un <em>soak</em> corto</td><td>Convierte una promesa de rendimiento en un número actual.</td><td>Bajo</td></tr>
-      <tr><td>7</td><td>Extracción de PDF y DOCX</td><td>Amplía los formatos que de verdad se entregan.</td><td>Medio</td></tr>
+      <tr><td>1</td><td>Configurar respaldos y ejecutar una restauración de prueba</td><td>El sistema ya está desplegado; ahora hay que demostrar recuperación ante pérdida de datos.</td><td>Bajo</td></tr>
+      <tr><td>2</td><td>Confirmar monitorización y alertas externas del frontend y la API</td><td>El health check responde; falta vigilar disponibilidad y latencia fuera de la plataforma.</td><td>Bajo</td></tr>
+      <tr><td>3</td><td>E2E del recorrido registro → entrega → nota → ranking</td><td>Cierra el hueco declarado del RNF-CAL-3.</td><td>Medio</td></tr>
+      <tr><td>4</td><td>Política de tratamiento, aviso y canal de PQRS</td><td>Obligaciones documentales de la Ley 1581.</td><td>Medio, jurídico</td></tr>
+      <tr><td>5</td><td>Re-medir capacidad con admisión y hacer un <em>soak</em> corto</td><td>Convierte una promesa de rendimiento en un número actual del entorno real.</td><td>Bajo</td></tr>
+      <tr><td>6</td><td>Extracción de PDF y DOCX</td><td>Amplía los formatos que de verdad se entregan.</td><td>Medio</td></tr>
     </tbody>
   </table>
 </div>

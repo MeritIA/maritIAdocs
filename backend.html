@@ -288,7 +288,7 @@ sequenceDiagram
 <ul>
   <li><strong>Pagos simulados.</strong> No hay pasarela: el saldo, los abonos y los retiros existen como pantalla y como decisión de alcance, no como dinero real.</li>
   <li><strong>PDF y DOCX sin extracción.</strong> Se admiten al subir, pero la evaluación falla con motivo en vez de calificarse.</li>
-  <li><strong>Sin entorno desplegado.</strong> El pipeline publica imagen; el despliegue está desactivado hasta elegir proveedor.</li>
+  <li><strong>Despliegue realizado.</strong> La API está publicada en Azure Container Apps y responde en su endpoint de salud. La configuración de CI conserva el gate de despliegue por ambiente; distingue esa automatización de los entornos ya desplegados.</li>
   <li><strong>Rotación de la clave de cifrado sin resolver.</strong> Es un requisito de operación, no de funcionalidad.</li>
   <li><strong>Métricas por grupo demográfico inexistentes.</strong> La plataforma no recoge esos datos, así que no puede medir impacto diferencial. Se declara en lugar de inventarlo.</li>
 </ul>
