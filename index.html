@@ -142,6 +142,73 @@
   </div>
 </div>
 
+<h2 id="buenas-practicas">Buenas prácticas que guían el proyecto</h2>
+<p>
+  MeritIA combina disciplina de documentación, revisión humana y verificación técnica. La regla común
+  es no confundir una intención con una garantía: se distingue lo que está implementado, lo que se
+  probó y lo que sigue pendiente.
+</p>
+
+<div class="rejilla rejilla--3">
+  <div class="tarjeta">
+    <span class="tarjeta__num">01 · Documentos primero</span>
+    <h3>Requisitos antes que suposiciones</h3>
+    <p>Charter, alcance, requisitos, seguridad y arquitectura son las fuentes de verdad. Los requisitos se trazan a módulos, código y pruebas; las contradicciones se registran en ADR en vez de resolverse en silencio. El estado se mantiene separado: implementado, parcial o pendiente.</p>
+    <span class="tarjeta__pie"><a href="requisitos.html">Requisitos y trazabilidad →</a></span>
+  </div>
+  <div class="tarjeta">
+    <span class="tarjeta__num">02 · IA con supervisión</span>
+    <h3>Copiloto, no autoridad</h3>
+    <p>El trabajo backend se guía por un prompt que pide análisis documental, diseño, implementación incremental, pruebas y revisión de seguridad. Las sugerencias de IA se contrastan con los documentos, el código y la CI; no sustituyen decisiones humanas ni reciben autoría. En el producto, el modelo propone puntajes: el servicio valida la salida y calcula la nota.</p>
+    <span class="tarjeta__pie"><a href="backend.html#prompt-ingenieria">Prompt y límites →</a></span>
+  </div>
+  <div class="tarjeta">
+    <span class="tarjeta__num">03 · Seguridad por diseño</span>
+    <h3>Varias barreras, no una sola</h3>
+    <p>PASETO, contraseñas con argon2id, PII cifrada, autorización por recurso, validación de entradas, límites por IP/usuario/operación, errores sin trazas y registros sin datos sensibles. El texto enviado a IA se trata como no confiable y el servicio no recibe archivos.</p>
+    <span class="tarjeta__pie"><a href="backend.html#seguridad">Controles del backend →</a></span>
+  </div>
+  <div class="tarjeta">
+    <span class="tarjeta__num">04 · Revisión y pruebas</span>
+    <h3>Verificar cada cambio</h3>
+    <p>La CI revisa secretos, dependencias, formato, compilación, OpenAPI, pruebas y cobertura antes de publicar artefactos. El backend registra 586 pruebas, 89,6 % de cobertura de líneas y 77 % de ramas. Se declara el hueco: aún falta un E2E que recorra el flujo completo.</p>
+    <span class="tarjeta__pie"><a href="estado.html#parcial">Estado de pruebas →</a></span>
+  </div>
+  <div class="tarjeta">
+    <span class="tarjeta__num">05 · Autoataque autorizado</span>
+    <h3>Buscar cómo romper lo propio</h3>
+    <p>La revisión adversarial contempla roles, IDs, archivos, límites, sesiones, IA y entradas maliciosas, siempre en sistemas propios o autorizados. Cada hallazgo debe convertirse en una corrección y una regresión. El red team interno se ha practicado, pero todavía no tiene umbral acordado ni un informe de cierre: no se presenta como certificación.</p>
+    <span class="tarjeta__pie"><a href="requisitos.html#no-funcionales">Brechas de seguridad y pruebas →</a></span>
+  </div>
+  <div class="tarjeta">
+    <span class="tarjeta__num">06 · Disponibilidad en Azure</span>
+    <h3>Separar “vivo” de “listo”</h3>
+    <p>El frontend se publica en Vercel y la API en Azure Container Apps. <code>/api/salud</code> confirma que el proceso responde; <code>/api/salud/listo</code> revisa dependencias. En la comprobación del 25/11/2026 la API estaba viva, pero readiness quedó degradado por timeout de IA; base, almacenamiento y cola respondían. La cola permite esperar y reintentar, pero no equivale a un SLA ni a alta disponibilidad.</p>
+    <span class="tarjeta__pie"><a href="operacion.html#salud">Salud y operación →</a></span>
+  </div>
+</div>
+
+<div class="diagrama diagrama--ancho">
+  <div class="diagrama__cabecera"><span class="punto"></span>Ciclo de trabajo y mejora</div>
+  <div class="diagrama__lienzo">
+    <div class="mermaid">
+flowchart LR
+  DOC["Documentos<br/>fuente de verdad"] --> TRACE["Trazabilidad<br/>requisito → módulo → prueba"]
+  TRACE --> DESIGN["Diseño y ADR"]
+  DESIGN --> CODE["Implementación incremental"]
+  CODE --> CI["CI<br/>lint · build · pruebas"]
+  CI --> REVIEW["Revisión humana<br/>seguridad · rendimiento"]
+  REVIEW -->|"hallazgo"| FIX["Corrección + regresión"]
+  FIX --> CI
+  REVIEW -->|"aceptado"| DEP["Despliegue<br/>Vercel + Azure"]
+  DEP --> HEALTH["Health / readiness"]
+  HEALTH -->|"degradación"| OBS["Diagnóstico y ajuste"]
+  OBS --> DOC
+    </div>
+  </div>
+  <div class="diagrama__pie">La IA puede ayudar a analizar y proponer; las fuentes, las pruebas, las personas revisoras y el estado de salud deciden qué se acepta.</div>
+</div>
+
 <h2>El mapa del sistema</h2>
 <p>
   Tres procesos desplegables y dos proveedores externos. El backend es el único que habla con la

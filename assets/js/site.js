@@ -138,7 +138,7 @@
         </a>
         <nav class="barra__nav" aria-label="Secciones principales">${enlaces}</nav>
         <div class="barra__acciones">
-          <button class="boton-buscar" data-accion="buscar" aria-label="Buscar en la documentación">
+          <button class="boton-buscar" data-accion="buscar">
             ${icono('buscar')}<span>Buscar</span><kbd>⌘K</kbd>
           </button>
           <button class="icono-boton" data-accion="tema" aria-label="Cambiar de tema" title="Cambiar de tema"></button>
